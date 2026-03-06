@@ -1,0 +1,49 @@
+body {
+    font-family: sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 40px;
+    overflow: auto;
+}
+
+/* The canvas that holds the entire tree */
+#canvas {
+    display: flex;
+    align-items: center;
+}
+
+/* A Branch contains a Node and its Children */
+.branch {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin: 10px 0;
+}
+
+/* The actual editable text box */
+.node {
+    min-width: 100px;
+    min-height: 24px;
+    padding: 10px;
+    background-color: #ffffff;
+    border: 2px solid #333;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    outline: none;
+    z-index: 2;
+    cursor: text;
+}
+
+.node:focus {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+/* Container for sub-branches */
+.children {
+    display: flex;
+    flex-direction: column;
+    margin-left: 40px; /* Spacing between parent and children */
+    border-left: 2px solid #999; /* Temporary basic line for Phase 1 */
+    padding-left: 20px;
+}
