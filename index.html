@@ -10,7 +10,13 @@
 
     <div id="canvas">
         <div class="branch" id="root">
-            <div class="node" contenteditable="true" data-id="node-1">Starting Node</div>
+            <div class="node-container">
+                <div class="node" contenteditable="true" data-id="node-1">Starting Node</div>
+                <div class="controls">
+                    <button class="btn-add btn-sibling" title="Add Sibling (Same Level)">⬆️</button>
+                    <button class="btn-add btn-child" title="Add Child (Lower Level)">➡️</button>
+                </div>
+            </div>
             <div class="children"></div>
         </div>
     </div>
