@@ -4,42 +4,41 @@ body {
     margin: 0;
     padding: 40px;
     overflow: auto;
+    min-height: 100vh;
 }
 
 #canvas {
-    display: flex;
-    align-items: flex-start;
+    display: inline-flex;
+    align-items: center; /* Centers the whole tree vertically */
+    min-height: 80vh; 
+    position: relative;
 }
 
-/* --- Tree Line Formatting --- */
+/* --- The SVG Background for Curly Lines --- */
+#connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Lets you click through the lines to the background */
+    z-index: 1;
+    overflow: visible;
+}
+
+/* --- Tree Structural Formatting --- */
 .branch {
     display: flex;
-    align-items: flex-start;
+    align-items: center; /* Centers parent vertically relative to its children */
     position: relative;
-    padding-left: 20px; /* Space for the horizontal line */
     margin: 10px 0;
 }
 
-/* Draws the horizontal line from the spine to the text box */
-.branch::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 22px; /* Aligns with middle of a single-line text box */
-    width: 20px;
-    border-top: 2px solid #999;
-}
-
-/* Hide incoming lines for the root */
-#root { padding-left: 0; margin-top: 0; }
-#root::before { display: none; }
-
-/* The vertical spine connecting sibling branches */
 .children {
     display: flex;
     flex-direction: column;
-    border-left: 2px solid #999; 
-    margin-left: 0px; 
+    justify-content: center;
+    margin-left: 50px; /* Spacing between parent and children for the curly line */
     padding-left: 0;
 }
 
@@ -48,6 +47,7 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    z-index: 2; /* Keeps nodes above the SVG lines */
 }
 
 .node {
@@ -59,14 +59,20 @@ body {
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     outline: none;
-    z-index: 2;
     cursor: text;
-    white-space: pre-wrap; /* Keeps text formatting nice */
+    white-space: pre-wrap;
 }
 
 .node:focus {
     border-color: #0066cc;
     box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+}
+
+/* Smart Placeholder Text Logic */
+.node:empty::before {
+    content: attr(data-placeholder);
+    color: #999;
+    pointer-events: none;
 }
 
 /* --- Hover Buttons (Arrows) --- */
@@ -79,10 +85,7 @@ body {
     z-index: 10;
 }
 
-/* Show buttons when hovering over the container */
-.node-container:hover .controls {
-    display: flex;
-}
+.node-container:hover .controls { display: flex; }
 
 .btn-add {
     background: white;
@@ -95,7 +98,4 @@ body {
     transition: background 0.2s;
 }
 
-.btn-add:hover {
-    background: #e0f0ff;
-    border-color: #0066cc;
-}
+.btn-add:hover { background: #e0f0ff; border-color: #0066cc; }

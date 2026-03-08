@@ -1,6 +1,5 @@
 let nodeCounter = 1;
 
-// Function to create a new branch with the hover buttons
 function createBranch() {
     nodeCounter++;
     const branch = document.createElement('div');
@@ -32,6 +31,60 @@ function createBranch() {
     return { branch, node };
 }
 
+// --- NEW: Dynamic SVG Curly Line Drawer ---
+function drawLines() {
+    const svg = document.getElementById('connections');
+    const canvas = document.getElementById('canvas');
+    svg.innerHTML = ''; // Clear old lines
+    
+    // Ensure SVG covers the whole scrollable area
+    svg.style.width = canvas.scrollWidth + 'px';
+    svg.style.height = canvas.scrollHeight + 'px';
+
+    const branches = document.querySelectorAll('.branch');
+    const svgRect = svg.getBoundingClientRect();
+
+    branches.forEach(branch => {
+        const parentNode = branch.querySelector(':scope > .node-container > .node');
+        const childrenContainer = branch.querySelector(':scope > .children');
+        const childBranches = childrenContainer.querySelectorAll(':scope > .branch');
+        
+        if (!parentNode || childBranches.length === 0) return;
+
+        const parentRect = parentNode.getBoundingClientRect();
+        
+        // Parent connection point (Right middle)
+        const startX = parentRect.right - svgRect.left;
+        const startY = parentRect.top + (parentRect.height / 2) - svgRect.top;
+
+        childBranches.forEach(childBranch => {
+            const childNode = childBranch.querySelector(':scope > .node-container > .node');
+            if (!childNode) return;
+
+            const childRect = childNode.getBoundingClientRect();
+            
+            // Child connection point (Left middle)
+            const endX = childRect.left - svgRect.left;
+            const endY = childRect.top + (childRect.height / 2) - svgRect.top;
+
+            // Math for the Bezier S-Curve
+            const controlX1 = startX + (endX - startX) / 2;
+            const controlY1 = startY;
+            const controlX2 = startX + (endX - startX) / 2;
+            const controlY2 = endY;
+
+            // Draw the line
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', '#a0aec0'); // Soft grey color
+            path.setAttribute('stroke-width', '2');
+
+            svg.appendChild(path);
+        });
+    });
+}
+
 // 1. Listen for Keyboard Shortcuts
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
@@ -39,70 +92,76 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     const currentNode = e.target;
     const currentBranch = currentNode.closest('.branch');
 
-    // Shift + Enter -> Allow default text newline
-    if (e.key === 'Enter' && e.shiftKey) return; 
+    if (e.key === 'Enter' && e.shiftKey) {
+        setTimeout(drawLines, 10); // Redraw lines when box grows
+        return; 
+    }
 
-    // Enter -> Create Sibling
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
         if (currentBranch.id === 'root') return; 
         const newElements = createBranch();
         currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
         newElements.node.focus();
+        drawLines();
     }
 
-    // Tab -> Create Child
     if (e.key === 'Tab') {
         e.preventDefault(); 
         const childrenContainer = currentBranch.querySelector('.children');
         const newElements = createBranch();
         childrenContainer.appendChild(newElements.branch);
         newElements.node.focus();
+        drawLines();
     }
 
-    // Backspace -> Delete branch if text box is empty
     if (e.key === 'Backspace') {
         if (currentNode.textContent.trim() === '') {
             e.preventDefault();
-            if (currentBranch.id === 'root') return; // Do not delete the starting node
+            if (currentBranch.id === 'root') return; 
             
             const prevSibling = currentBranch.previousElementSibling;
             const parentNode = currentBranch.parentElement.closest('.branch')?.querySelector('.node');
             
-            currentBranch.remove(); // Delete it
+            currentBranch.remove(); 
 
-            // Shift focus so you can keep typing seamlessly
-            if (prevSibling) {
-                prevSibling.querySelector('.node').focus();
-            } else if (parentNode) {
-                parentNode.focus();
-            }
+            if (prevSibling) prevSibling.querySelector('.node').focus();
+            else if (parentNode) parentNode.focus();
+            
+            drawLines();
         }
     }
 });
 
-// 2. Listen for Hover Button Clicks (Mouse controls)
+// Update lines as you type (in case the box gets taller)
+document.getElementById('canvas').addEventListener('input', drawLines);
+
+// 2. Listen for Hover Button Clicks
 document.getElementById('canvas').addEventListener('click', function(e) {
-    // Clicked Up Arrow (Sibling)
     if (e.target.classList.contains('btn-sibling')) {
         const currentBranch = e.target.closest('.branch');
         if (currentBranch.id === 'root') return;
         const newElements = createBranch();
         currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
         newElements.node.focus();
+        drawLines();
     }
     
-    // Clicked Right Arrow (Child)
     if (e.target.classList.contains('btn-child')) {
         const currentBranch = e.target.closest('.branch');
         const childrenContainer = currentBranch.querySelector('.children');
         const newElements = createBranch();
         childrenContainer.appendChild(newElements.branch);
         newElements.node.focus();
+        drawLines();
     }
 });
 
-// Auto-focus the root node on load
+// Redraw lines if window resizes
+window.addEventListener('resize', drawLines);
+
+// Init
 window.onload = () => {
     document.querySelector('.node').focus();
+    drawLines();
 };
