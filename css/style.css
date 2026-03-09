@@ -42,6 +42,65 @@ body {
     padding: 0;
 }
 
+.toolbar-divider {
+    width: 1px;
+    height: 30px;
+    background-color: #ddd;
+    margin: 0 10px;
+}
+
+.color-swatches {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Preset Color Buttons */
+.swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s, border-color 0.1s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.swatch:hover {
+    transform: scale(1.15);
+    border-color: #333;
+}
+
+/* Custom Color Picker (Hidden default input, showing an icon instead) */
+.custom-picker-wrapper {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #f0f0f0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.custom-picker-wrapper:hover {
+    background: #e0e0e0;
+}
+
+.custom-picker-wrapper input[type="color"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Hides the ugly native button, keeps it clickable */
+    cursor: pointer;
+}
+
 /* --- Canvas Adjustments --- */
 #canvas {
     display: inline-flex;

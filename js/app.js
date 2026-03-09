@@ -8,8 +8,8 @@ function selectNode(node) {
     activeNode.classList.add('active');
     
     // Update toolbar pickers to match the clicked node
-    document.getElementById('bg-color').value = activeNode.dataset.bg;
-    document.getElementById('text-color').value = activeNode.dataset.text;
+    document.getElementById('bg-color-custom').value = activeNode.dataset.bg;
+    document.getElementById('text-color-custom').value = activeNode.dataset.text;
 }
 
 // --- UPDATED: createBranch now accepts colors for inheritance ---
@@ -196,7 +196,41 @@ document.getElementById('canvas').addEventListener('click', function(e) {
     }
 });
 
-window.addEventListener('resize', drawLines);
+// --- Event Listeners ---
+
+// 1. Preset Swatch Clicks
+document.getElementById('toolbar').addEventListener('click', function(e) {
+    if (e.target.classList.contains('swatch')) {
+        const selectedColor = e.target.dataset.color;
+        
+        // Check if it's a BG swatch or Text swatch based on its parent
+        if (e.target.closest('#bg-swatches') && activeNode) {
+            activeNode.style.backgroundColor = selectedColor;
+            activeNode.dataset.bg = selectedColor;
+            document.getElementById('bg-color-custom').value = selectedColor; // Sync custom picker
+        } 
+        else if (e.target.closest('#text-swatches') && activeNode) {
+            activeNode.style.color = selectedColor;
+            activeNode.dataset.text = selectedColor;
+            document.getElementById('text-color-custom').value = selectedColor; // Sync custom picker
+        }
+    }
+});
+
+// 2. Custom Color Picker Inputs
+document.getElementById('bg-color-custom').addEventListener('input', function(e) {
+    if (activeNode) {
+        activeNode.style.backgroundColor = e.target.value;
+        activeNode.dataset.bg = e.target.value;
+    }
+});
+
+document.getElementById('text-color-custom').addEventListener('input', function(e) {
+    if (activeNode) {
+        activeNode.style.color = e.target.value;
+        activeNode.dataset.text = e.target.value;
+    }
+});
 
 window.onload = () => {
     const rootNode = document.querySelector('.node');

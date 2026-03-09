@@ -9,12 +9,41 @@
 <body>
 
     <!-- NEW: The Unified Top Toolbar -->
+    <!-- The Unified Top Toolbar -->
     <div id="toolbar">
-        <div class="tool-group" id="color-tools">
-            <label>Background: <input type="color" id="bg-color" value="#ffffff"></label>
-            <label>Text: <input type="color" id="text-color" value="#000000"></label>
+        
+        <!-- Background Color Presets -->
+        <div class="tool-group">
+            <label>Bg:</label>
+            <div class="color-swatches" id="bg-swatches">
+                <button class="swatch" style="background-color: #ffffff;" data-color="#ffffff"></button>
+                <button class="swatch" style="background-color: #ffebee;" data-color="#ffebee"></button> <!-- Light Red -->
+                <button class="swatch" style="background-color: #e3f2fd;" data-color="#e3f2fd"></button> <!-- Light Blue -->
+                <button class="swatch" style="background-color: #e8f5e9;" data-color="#e8f5e9"></button> <!-- Light Green -->
+                <button class="swatch" style="background-color: #fff8e1;" data-color="#fff8e1"></button> <!-- Light Yellow -->
+                <div class="custom-picker-wrapper" title="Custom Background Color">
+                    <input type="color" id="bg-color-custom" value="#ffffff">
+                    <span>🎨</span>
+                </div>
+            </div>
         </div>
-        <!-- Phase 4 Tabs and Phase 5 Save buttons will go here later -->
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Text Color Presets -->
+        <div class="tool-group">
+            <label>Text:</label>
+            <div class="color-swatches" id="text-swatches">
+                <button class="swatch" style="background-color: #000000;" data-color="#000000"></button>
+                <button class="swatch" style="background-color: #d32f2f;" data-color="#d32f2f"></button> <!-- Red -->
+                <button class="swatch" style="background-color: #1976d2;" data-color="#1976d2"></button> <!-- Blue -->
+                <div class="custom-picker-wrapper" title="Custom Text Color">
+                    <input type="color" id="text-color-custom" value="#000000">
+                    <span>🎨</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div id="canvas">
