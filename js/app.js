@@ -1,6 +1,19 @@
 let nodeCounter = 1;
+let activeNode = null; // Tracks which node is currently selected
 
-function createBranch() {
+// --- NEW: Select Node Logic ---
+function selectNode(node) {
+    if (activeNode) activeNode.classList.remove('active');
+    activeNode = node;
+    activeNode.classList.add('active');
+    
+    // Update toolbar pickers to match the clicked node
+    document.getElementById('bg-color').value = activeNode.dataset.bg;
+    document.getElementById('text-color').value = activeNode.dataset.text;
+}
+
+// --- UPDATED: createBranch now accepts colors for inheritance ---
+function createBranch(bgColor = "#ffffff", textColor = "#000000") {
     nodeCounter++;
     const branch = document.createElement('div');
     branch.className = 'branch';
@@ -12,6 +25,12 @@ function createBranch() {
     node.className = 'node';
     node.contentEditable = 'true';
     node.dataset.id = `node-${nodeCounter}`;
+    
+    // Apply inherited colors
+    node.dataset.bg = bgColor;
+    node.dataset.text = textColor;
+    node.style.backgroundColor = bgColor;
+    node.style.color = textColor;
 
     const controls = document.createElement('div');
     controls.className = 'controls';
@@ -31,13 +50,12 @@ function createBranch() {
     return { branch, node };
 }
 
-// --- NEW: Dynamic SVG Curly Line Drawer ---
+// --- SVG Curly Line Drawer (Unchanged) ---
 function drawLines() {
     const svg = document.getElementById('connections');
     const canvas = document.getElementById('canvas');
-    svg.innerHTML = ''; // Clear old lines
+    svg.innerHTML = ''; 
     
-    // Ensure SVG covers the whole scrollable area
     svg.style.width = canvas.scrollWidth + 'px';
     svg.style.height = canvas.scrollHeight + 'px';
 
@@ -52,8 +70,6 @@ function drawLines() {
         if (!parentNode || childBranches.length === 0) return;
 
         const parentRect = parentNode.getBoundingClientRect();
-        
-        // Parent connection point (Right middle)
         const startX = parentRect.right - svgRect.left;
         const startY = parentRect.top + (parentRect.height / 2) - svgRect.top;
 
@@ -62,22 +78,18 @@ function drawLines() {
             if (!childNode) return;
 
             const childRect = childNode.getBoundingClientRect();
-            
-            // Child connection point (Left middle)
             const endX = childRect.left - svgRect.left;
             const endY = childRect.top + (childRect.height / 2) - svgRect.top;
 
-            // Math for the Bezier S-Curve
             const controlX1 = startX + (endX - startX) / 2;
             const controlY1 = startY;
             const controlX2 = startX + (endX - startX) / 2;
             const controlY2 = endY;
 
-            // Draw the line
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('d', `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`);
             path.setAttribute('fill', 'none');
-            path.setAttribute('stroke', '#a0aec0'); // Soft grey color
+            path.setAttribute('stroke', '#a0aec0'); 
             path.setAttribute('stroke-width', '2');
 
             svg.appendChild(path);
@@ -85,22 +97,49 @@ function drawLines() {
     });
 }
 
-// 1. Listen for Keyboard Shortcuts
+// --- Event Listeners ---
+
+// Handle Toolbar Color Changes
+document.getElementById('bg-color').addEventListener('input', function(e) {
+    if (activeNode) {
+        activeNode.style.backgroundColor = e.target.value;
+        activeNode.dataset.bg = e.target.value;
+    }
+});
+
+document.getElementById('text-color').addEventListener('input', function(e) {
+    if (activeNode) {
+        activeNode.style.color = e.target.value;
+        activeNode.dataset.text = e.target.value;
+    }
+});
+
+// Focus/Click a node to make it active
+document.getElementById('canvas').addEventListener('focusin', function(e) {
+    if (e.target.classList.contains('node')) {
+        selectNode(e.target);
+    }
+});
+
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
 
     const currentNode = e.target;
     const currentBranch = currentNode.closest('.branch');
+    
+    // Grab colors for inheritance
+    const currentBg = currentNode.dataset.bg;
+    const currentText = currentNode.dataset.text;
 
     if (e.key === 'Enter' && e.shiftKey) {
-        setTimeout(drawLines, 10); // Redraw lines when box grows
+        setTimeout(drawLines, 10);
         return; 
     }
 
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
         if (currentBranch.id === 'root') return; 
-        const newElements = createBranch();
+        const newElements = createBranch(currentBg, currentText); // Inherit!
         currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
         newElements.node.focus();
         drawLines();
@@ -109,7 +148,7 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
         e.preventDefault(); 
         const childrenContainer = currentBranch.querySelector('.children');
-        const newElements = createBranch();
+        const newElements = createBranch(currentBg, currentText); // Inherit!
         childrenContainer.appendChild(newElements.branch);
         newElements.node.focus();
         drawLines();
@@ -133,35 +172,35 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     }
 });
 
-// Update lines as you type (in case the box gets taller)
 document.getElementById('canvas').addEventListener('input', drawLines);
 
-// 2. Listen for Hover Button Clicks
 document.getElementById('canvas').addEventListener('click', function(e) {
-    if (e.target.classList.contains('btn-sibling')) {
+    if (e.target.classList.contains('btn-sibling') || e.target.classList.contains('btn-child')) {
         const currentBranch = e.target.closest('.branch');
-        if (currentBranch.id === 'root') return;
-        const newElements = createBranch();
-        currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
-        newElements.node.focus();
-        drawLines();
-    }
-    
-    if (e.target.classList.contains('btn-child')) {
-        const currentBranch = e.target.closest('.branch');
-        const childrenContainer = currentBranch.querySelector('.children');
-        const newElements = createBranch();
-        childrenContainer.appendChild(newElements.branch);
-        newElements.node.focus();
+        const parentNode = currentBranch.querySelector(':scope > .node-container > .node');
+        const currentBg = parentNode.dataset.bg;
+        const currentText = parentNode.dataset.text;
+
+        if (e.target.classList.contains('btn-sibling')) {
+            if (currentBranch.id === 'root') return;
+            const newElements = createBranch(currentBg, currentText);
+            currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
+            newElements.node.focus();
+        } else {
+            const childrenContainer = currentBranch.querySelector('.children');
+            const newElements = createBranch(currentBg, currentText);
+            childrenContainer.appendChild(newElements.branch);
+            newElements.node.focus();
+        }
         drawLines();
     }
 });
 
-// Redraw lines if window resizes
 window.addEventListener('resize', drawLines);
 
-// Init
 window.onload = () => {
-    document.querySelector('.node').focus();
+    const rootNode = document.querySelector('.node');
+    selectNode(rootNode); // Set initial active node
+    rootNode.focus();
     drawLines();
 };

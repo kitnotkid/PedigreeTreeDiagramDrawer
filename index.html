@@ -8,12 +8,22 @@
 </head>
 <body>
 
+    <!-- NEW: The Unified Top Toolbar -->
+    <div id="toolbar">
+        <div class="tool-group" id="color-tools">
+            <label>Background: <input type="color" id="bg-color" value="#ffffff"></label>
+            <label>Text: <input type="color" id="text-color" value="#000000"></label>
+        </div>
+        <!-- Phase 4 Tabs and Phase 5 Save buttons will go here later -->
+    </div>
+
     <div id="canvas">
         <svg id="connections"></svg>
         
         <div class="branch" id="root">
             <div class="node-container">
-                <div class="node" contenteditable="true" data-id="node-1" data-placeholder="Starting Node"></div>
+                <!-- Added data-bg and data-text to track colors for inheritance -->
+                <div class="node active" contenteditable="true" data-id="node-1" data-placeholder="Starting Node" data-bg="#ffffff" data-text="#000000"></div>
                 <div class="controls">
                     <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
                     <button class="btn-add btn-child" title="Add Child">➡️</button>

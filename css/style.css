@@ -2,15 +2,53 @@ body {
     font-family: sans-serif;
     background-color: #f4f4f9;
     margin: 0;
-    padding: 40px;
+    padding: 0; /* Removed padding so toolbar sits flush */
     overflow: auto;
     min-height: 100vh;
 }
 
+/* --- NEW: Top Toolbar --- */
+#toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+.tool-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.tool-group input[type="color"] {
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 24px;
+    width: 30px;
+    padding: 0;
+}
+
+/* --- Canvas Adjustments --- */
 #canvas {
     display: inline-flex;
-    align-items: center; /* Centers the whole tree vertically */
-    min-height: 80vh; 
+    align-items: center;
+    min-height: calc(100vh - 50px); /* Adjust height for toolbar */
+    margin-top: 50px; /* Push down below toolbar */
+    padding: 40px;
     position: relative;
 }
 
@@ -21,7 +59,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Lets you click through the lines to the background */
+    pointer-events: none;
     z-index: 1;
     overflow: visible;
 }
@@ -29,7 +67,7 @@ body {
 /* --- Tree Structural Formatting --- */
 .branch {
     display: flex;
-    align-items: center; /* Centers parent vertically relative to its children */
+    align-items: center;
     position: relative;
     margin: 10px 0;
 }
@@ -38,7 +76,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-left: 50px; /* Spacing between parent and children for the curly line */
+    margin-left: 50px;
     padding-left: 0;
 }
 
@@ -47,7 +85,7 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-    z-index: 2; /* Keeps nodes above the SVG lines */
+    z-index: 2;
 }
 
 .node {
@@ -55,20 +93,22 @@ body {
     min-height: 24px;
     padding: 10px;
     background-color: #ffffff;
+    color: #000000;
     border: 2px solid #333;
     border-radius: 8px;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     outline: none;
     cursor: text;
     white-space: pre-wrap;
+    transition: all 0.2s; /* Smooth color changes */
 }
 
-.node:focus {
-    border-color: #0066cc;
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.2);
+/* NEW: Highlight the actively selected node */
+.node.active {
+    border-color: #ffaa00; /* Orange highlight */
+    box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.3);
 }
 
-/* Smart Placeholder Text Logic */
 .node:empty::before {
     content: attr(data-placeholder);
     color: #999;
