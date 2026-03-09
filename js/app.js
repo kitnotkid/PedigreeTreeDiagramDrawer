@@ -1,7 +1,7 @@
 let nodeCounter = 1;
 let activeNode = null; // Tracks which node is currently selected
 
-// --- NEW: Select Node Logic ---
+// --- Select Node Logic ---
 function selectNode(node) {
     if (activeNode) activeNode.classList.remove('active');
     activeNode = node;
@@ -12,7 +12,7 @@ function selectNode(node) {
     document.getElementById('text-color-custom').value = activeNode.dataset.text;
 }
 
-// --- UPDATED: createBranch now accepts colors for inheritance ---
+// --- createBranch (with color inheritance) ---
 function createBranch(bgColor = "#ffffff", textColor = "#000000") {
     nodeCounter++;
     const branch = document.createElement('div');
@@ -50,7 +50,7 @@ function createBranch(bgColor = "#ffffff", textColor = "#000000") {
     return { branch, node };
 }
 
-// --- SVG Curly Line Drawer (Unchanged) ---
+// --- SVG Curly Line Drawer ---
 function drawLines() {
     const svg = document.getElementById('connections');
     const canvas = document.getElementById('canvas');
@@ -97,22 +97,7 @@ function drawLines() {
     });
 }
 
-// --- Event Listeners ---
-
-// Handle Toolbar Color Changes
-document.getElementById('bg-color').addEventListener('input', function(e) {
-    if (activeNode) {
-        activeNode.style.backgroundColor = e.target.value;
-        activeNode.dataset.bg = e.target.value;
-    }
-});
-
-document.getElementById('text-color').addEventListener('input', function(e) {
-    if (activeNode) {
-        activeNode.style.color = e.target.value;
-        activeNode.dataset.text = e.target.value;
-    }
-});
+// --- EVENT LISTENERS ---
 
 // Focus/Click a node to make it active
 document.getElementById('canvas').addEventListener('focusin', function(e) {
@@ -121,6 +106,7 @@ document.getElementById('canvas').addEventListener('focusin', function(e) {
     }
 });
 
+// Keyboard Controls (Tab, Enter, Backspace)
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
 
@@ -139,7 +125,7 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
         if (currentBranch.id === 'root') return; 
-        const newElements = createBranch(currentBg, currentText); // Inherit!
+        const newElements = createBranch(currentBg, currentText); 
         currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
         newElements.node.focus();
         drawLines();
@@ -148,7 +134,7 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (e.key === 'Tab') {
         e.preventDefault(); 
         const childrenContainer = currentBranch.querySelector('.children');
-        const newElements = createBranch(currentBg, currentText); // Inherit!
+        const newElements = createBranch(currentBg, currentText); 
         childrenContainer.appendChild(newElements.branch);
         newElements.node.focus();
         drawLines();
@@ -172,8 +158,10 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     }
 });
 
+// Redraw lines on typing
 document.getElementById('canvas').addEventListener('input', drawLines);
 
+// Hover UI Button Clicks (Arrows)
 document.getElementById('canvas').addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-sibling') || e.target.classList.contains('btn-child')) {
         const currentBranch = e.target.closest('.branch');
@@ -196,28 +184,25 @@ document.getElementById('canvas').addEventListener('click', function(e) {
     }
 });
 
-// --- Event Listeners ---
-
-// 1. Preset Swatch Clicks
+// Toolbar Preset Swatch Clicks
 document.getElementById('toolbar').addEventListener('click', function(e) {
     if (e.target.classList.contains('swatch')) {
         const selectedColor = e.target.dataset.color;
         
-        // Check if it's a BG swatch or Text swatch based on its parent
         if (e.target.closest('#bg-swatches') && activeNode) {
             activeNode.style.backgroundColor = selectedColor;
             activeNode.dataset.bg = selectedColor;
-            document.getElementById('bg-color-custom').value = selectedColor; // Sync custom picker
+            document.getElementById('bg-color-custom').value = selectedColor;
         } 
         else if (e.target.closest('#text-swatches') && activeNode) {
             activeNode.style.color = selectedColor;
             activeNode.dataset.text = selectedColor;
-            document.getElementById('text-color-custom').value = selectedColor; // Sync custom picker
+            document.getElementById('text-color-custom').value = selectedColor;
         }
     }
 });
 
-// 2. Custom Color Picker Inputs
+// Toolbar Custom Color Pickers
 document.getElementById('bg-color-custom').addEventListener('input', function(e) {
     if (activeNode) {
         activeNode.style.backgroundColor = e.target.value;
@@ -232,9 +217,13 @@ document.getElementById('text-color-custom').addEventListener('input', function(
     }
 });
 
+// Window Resize Redraw
+window.addEventListener('resize', drawLines);
+
+// Initialization
 window.onload = () => {
     const rootNode = document.querySelector('.node');
-    selectNode(rootNode); // Set initial active node
+    selectNode(rootNode); 
     rootNode.focus();
     drawLines();
 };
