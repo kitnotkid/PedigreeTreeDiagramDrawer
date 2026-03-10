@@ -2,116 +2,91 @@ body {
     font-family: sans-serif;
     background-color: #f4f4f9;
     margin: 0;
-    padding: 0; /* Removed padding so toolbar sits flush */
-    overflow: auto;
-    min-height: 100vh;
+    padding: 0;
+    overflow: hidden; /* Scroll handled by canvas-wrapper */
 }
 
-/* --- NEW: Top Toolbar --- */
+/* --- Toolbar & Tabs --- */
 #toolbar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 60px;
     background-color: #ffffff;
     border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 15px;
     z-index: 100;
     box-sizing: border-box;
-    gap: 20px;
-}
-
-.tool-group {
-    display: flex;
     gap: 15px;
-    align-items: center;
-    font-size: 14px;
-    color: #333;
 }
 
-.tool-group input[type="color"] {
-    cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    height: 24px;
-    width: 30px;
-    padding: 0;
-}
-
-.toolbar-divider {
-    width: 1px;
-    height: 30px;
-    background-color: #ddd;
-    margin: 0 10px;
-}
-
-.color-swatches {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-/* Preset Color Buttons */
-.swatch {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.1s, border-color 0.1s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.swatch:hover {
-    transform: scale(1.15);
-    border-color: #333;
-}
-
-/* Custom Color Picker (Hidden default input, showing an icon instead) */
-.custom-picker-wrapper {
-    position: relative;
-    width: 28px;
-    height: 28px;
+#tab-container {
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: #f0f0f0;
-    border-radius: 4px;
+    gap: 10px;
+    flex: 1;
+    overflow: hidden;
+}
+
+#tab-bar {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 6px 12px;
+    background: #eee;
     border: 1px solid #ccc;
-    font-size: 14px;
-}
-
-.custom-picker-wrapper:hover {
-    background: #e0e0e0;
-}
-
-.custom-picker-wrapper input[type="color"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0; /* Hides the ugly native button, keeps it clickable */
+    border-radius: 4px 4px 0 0;
     cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* --- Canvas Adjustments --- */
+.tab.active {
+    background: #fff;
+    border-bottom-color: #fff;
+    font-weight: bold;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+}
+
+.tab-close { color: #999; }
+.tab-close:hover { color: #cc0000; }
+
+#btn-add-tab {
+    padding: 2px 8px;
+    cursor: pointer;
+    background: #4a5568;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+/* --- Layout Engine --- */
+#canvas-wrapper {
+    width: 100vw;
+    height: 100vh;
+    overflow: auto;
+    padding-top: 60px;
+}
+
 #canvas {
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 50px); /* Adjust height for toolbar */
-    margin-top: 50px; /* Push down below toolbar */
-    padding: 40px;
+    min-width: 100%;
+    min-height: calc(100vh - 60px);
     position: relative;
+    padding: 200px; /* Space for expansion */
 }
 
-/* --- The SVG Background for Curly Lines --- */
 #connections {
     position: absolute;
     top: 0;
@@ -120,81 +95,77 @@ body {
     height: 100%;
     pointer-events: none;
     z-index: 1;
-    overflow: visible;
 }
 
-/* --- Tree Structural Formatting --- */
+/* --- Bi-Directional Branching --- */
 .branch {
     display: flex;
     align-items: center;
     position: relative;
-    margin: 10px 0;
 }
 
-.children {
+/* Standard/Right Wing */
+.right-wing, .children {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    margin-left: 50px;
-    padding-left: 0;
+    margin-left: 60px;
 }
 
-/* --- Node Formatting --- */
+/* Left Wing */
+.left-wing {
+    display: flex;
+    flex-direction: column;
+    margin-right: 60px;
+}
+
+/* Flip direction for anything inside left-wing */
+.left-wing .branch {
+    flex-direction: row-reverse;
+}
+
+/* --- Node Styling --- */
 .node-container {
     position: relative;
-    display: flex;
-    align-items: center;
     z-index: 2;
 }
 
 .node {
-    min-width: 100px;
-    min-height: 24px;
-    padding: 10px;
-    background-color: #ffffff;
-    color: #000000;
+    min-width: 120px;
+    padding: 12px;
+    background: white;
     border: 2px solid #333;
-    border-radius: 8px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    border-radius: 6px;
     outline: none;
-    cursor: text;
-    white-space: pre-wrap;
-    transition: all 0.2s; /* Smooth color changes */
+    text-align: center;
+    transition: box-shadow 0.2s;
 }
 
-/* NEW: Highlight the actively selected node */
 .node.active {
-    border-color: #ffaa00; /* Orange highlight */
-    box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.3);
+    border-color: #ffaa00;
+    box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.4);
 }
 
-.node:empty::before {
-    content: attr(data-placeholder);
-    color: #999;
-    pointer-events: none;
-}
-
-/* --- Hover Buttons (Arrows) --- */
+/* --- Controls --- */
 .controls {
     display: none;
     position: absolute;
-    top: -15px;
-    right: -10px;
-    gap: 5px;
-    z-index: 10;
-}
-
-.node-container:hover .controls { display: flex; }
-
-.btn-add {
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 4px;
     background: white;
+    padding: 2px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    cursor: pointer;
-    padding: 2px 5px;
-    font-size: 14px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: background 0.2s;
 }
+.node-container:hover .controls { display: flex; }
 
-.btn-add:hover { background: #e0f0ff; border-color: #0066cc; }
+.btn-add { cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 3px; }
+.btn-add:hover { background: #f0f0f0; }
+
+/* Utils */
+.toolbar-divider { width: 1px; height: 30px; background: #ddd; }
+.color-swatches { display: flex; gap: 4px; }
+.swatch { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; }
+.custom-picker-wrapper { position: relative; cursor: pointer; }
+.custom-picker-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
