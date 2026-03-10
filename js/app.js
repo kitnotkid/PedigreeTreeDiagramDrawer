@@ -1,57 +1,59 @@
 let nodeCounter = 1;
-let activeNode = null; // Tracks which node is currently selected
+let activeNode = null; 
+
 // --- Select Node Logic ---
 function selectNode(node) {
-if (activeNode) activeNode.classList.remove('active');
-activeNode = node;
-activeNode.classList.add('active');
-// Update toolbar pickers to match the clicked node
-document.getElementById('bg-color-custom').value = activeNode.dataset.bg;
-document.getElementById('text-color-custom').value = activeNode.dataset.text;
+    if (activeNode) activeNode.classList.remove('active');
+    activeNode = node;
+    activeNode.classList.add('active');
+    
+    document.getElementById('bg-color-custom').value = activeNode.dataset.bg;
+    document.getElementById('text-color-custom').value = activeNode.dataset.text;
+}
+
 // --- createBranch (with color inheritance) ---
 function createBranch(bgColor = "#ffffff", textColor = "#000000") {
-nodeCounter++;
-const branch = document.createElement('div');
-branch.className = 'branch';
-const nodeContainer = document.createElement('div');
-nodeContainer.className = 'node-container';
+    nodeCounter++;
+    const branch = document.createElement('div');
+    branch.className = 'branch';
+    
+    const nodeContainer = document.createElement('div');
+    nodeContainer.className = 'node-container';
 
-const node = document.createElement('div');
-node.className = 'node';
-node.contentEditable = 'true';
-node.dataset.id = `node-${nodeCounter}`;
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.contentEditable = 'true';
+    node.dataset.id = `node-${nodeCounter}`;
 
-// Apply inherited colors
-node.dataset.bg = bgColor;
-node.dataset.text = textColor;
-node.style.backgroundColor = bgColor;
-node.style.color = textColor;
+    node.dataset.bg = bgColor;
+    node.dataset.text = textColor;
+    node.style.backgroundColor = bgColor;
+    node.style.color = textColor;
 
-const controls = document.createElement('div');
-controls.className = 'controls';
-controls.innerHTML = `
-    <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
-    <button class="btn-add btn-child" title="Add Child">➡️</button>
-`;
+    const controls = document.createElement('div');
+    controls.className = 'controls';
+    controls.innerHTML = `
+        <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
+        <button class="btn-add btn-child" title="Add Child">➡️</button>
+    `;
 
-nodeContainer.appendChild(node);
-nodeContainer.appendChild(controls);
+    nodeContainer.appendChild(node);
+    nodeContainer.appendChild(controls);
 
-const children = document.createElement('div');
-children.className = 'children';
+    const children = document.createElement('div');
+    children.className = 'children';
 
-branch.appendChild(nodeContainer);
-branch.appendChild(children);
-return { branch, node };
+    branch.appendChild(nodeContainer);
+    branch.appendChild(children);
+    return { branch, node };
 }
-// --- SVG Curly Line Drawer ---
+
 // --- SVG Curly Line Drawer (Updated for Center-Out) ---
 function drawLines() {
     const svg = document.getElementById('connections');
     const canvas = document.getElementById('canvas');
     svg.innerHTML = ''; 
     
-    // Ensure SVG covers the entire expanding canvas
     svg.style.width = canvas.scrollWidth + 'px';
     svg.style.height = canvas.scrollHeight + 'px';
 
@@ -62,20 +64,15 @@ function drawLines() {
         const parentNode = branch.querySelector(':scope > .node-container > .node');
         if (!parentNode) return;
 
-        // The root node has TWO .children containers (wing-left and wing-right)
-        // Regular branches only have ONE .children container
         const childContainers = branch.querySelectorAll(':scope > .children');
 
         childContainers.forEach(container => {
             const childBranches = container.querySelectorAll(':scope > .branch');
             if (childBranches.length === 0) return;
 
-            // Detect if this specific path is part of the left wing
             const isLeftWing = container.classList.contains('wing-left') || branch.closest('.wing-left');
-
             const parentRect = parentNode.getBoundingClientRect();
             
-            // Start X changes based on the wing direction
             const startX = isLeftWing ? (parentRect.left - svgRect.left) : (parentRect.right - svgRect.left);
             const startY = parentRect.top + (parentRect.height / 2) - svgRect.top;
 
@@ -85,11 +82,9 @@ function drawLines() {
 
                 const childRect = childNode.getBoundingClientRect();
                 
-                // End X changes based on the wing direction
                 const endX = isLeftWing ? (childRect.right - svgRect.left) : (childRect.left - svgRect.left);
                 const endY = childRect.top + (childRect.height / 2) - svgRect.top;
 
-                // Bezier control points remain centered between the two nodes
                 const controlX1 = startX + (endX - startX) / 2;
                 const controlY1 = startY;
                 const controlX2 = startX + (endX - startX) / 2;
@@ -106,44 +101,38 @@ function drawLines() {
         });
     });
 }
-// --- EVENT LISTENERS ---
-// Focus/Click a node to make it active
-document.getElementById('canvas').addEventListener('focusin', function(e) {
-if (e.target.classList.contains('node')) {
-selectNode(e.target);
-}
-});
-// Keyboard Controls (Tab, Enter, Backspace)
+
 // --- EVENT LISTENERS ---
 
-// Keyboard Controls (Tab, Enter, Backspace)
+document.getElementById('canvas').addEventListener('focusin', function(e) {
+    if (e.target.classList.contains('node')) {
+        selectNode(e.target);
+    }
+});
+
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
 
     const currentNode = e.target;
     const currentBranch = currentNode.closest('.branch');
     
-    // Grab colors for inheritance
     const currentBg = currentNode.dataset.bg;
     const currentText = currentNode.dataset.text;
 
-    // Shift + Enter = New Line in text
     if (e.key === 'Enter' && e.shiftKey) {
         setTimeout(drawLines, 10);
         return; 
     }
 
-    // Enter = Add Sibling
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
-        if (currentBranch.id === 'root') return; // Root cannot have siblings
+        if (currentBranch.id === 'root') return; 
         const newElements = createBranch(currentBg, currentText); 
         currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
         newElements.node.focus();
         drawLines();
     }
 
-    // Tab = Add Right Child (or normal child if not root)
     if (e.key === 'Tab' && !e.shiftKey) {
         e.preventDefault(); 
         let childrenContainer = currentBranch.id === 'root' 
@@ -156,7 +145,6 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
         drawLines();
     }
 
-    // Shift + Tab = Add Left Child (or normal child if not root)
     if (e.key === 'Tab' && e.shiftKey) {
         e.preventDefault();
         let childrenContainer = currentBranch.id === 'root' 
@@ -169,7 +157,6 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
         drawLines();
     }
 
-    // Backspace = Delete empty node
     if (e.key === 'Backspace') {
         if (currentNode.textContent.trim() === '') {
             e.preventDefault();
@@ -188,12 +175,9 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
     }
 });
 
-// Redraw lines on typing
 document.getElementById('canvas').addEventListener('input', drawLines);
 
-// Hover UI Button Clicks (Arrows)
 document.getElementById('canvas').addEventListener('click', function(e) {
-    // We now have to account for the new left/right root buttons
     if (e.target.classList.contains('btn-sibling') || 
         e.target.classList.contains('btn-child') ||
         e.target.classList.contains('btn-child-left') ||
@@ -222,7 +206,7 @@ document.getElementById('canvas').addEventListener('click', function(e) {
             childrenContainer.appendChild(newElements.branch);
             newElements.node.focus();
         }
-        else { // Normal btn-child
+        else {
             const childrenContainer = currentBranch.querySelector(':scope > .children');
             const newElements = createBranch(currentBg, currentText);
             childrenContainer.appendChild(newElements.branch);
@@ -231,64 +215,44 @@ document.getElementById('canvas').addEventListener('click', function(e) {
         drawLines();
     }
 });
-// Redraw lines on typing
-document.getElementById('canvas').addEventListener('input', drawLines);
-// Hover UI Button Clicks (Arrows)
-document.getElementById('canvas').addEventListener('click', function(e) {
-if (e.target.classList.contains('btn-sibling') || e.target.classList.contains('btn-child')) {
-const currentBranch = e.target.closest('.branch');
-const parentNode = currentBranch.querySelector(':scope > .node-container > .node');
-const currentBg = parentNode.dataset.bg;
-const currentText = parentNode.dataset.text;
-if (e.target.classList.contains('btn-sibling')) {
-        if (currentBranch.id === 'root') return;
-        const newElements = createBranch(currentBg, currentText);
-        currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
-        newElements.node.focus();
-    } else {
-        const childrenContainer = currentBranch.querySelector('.children');
-        const newElements = createBranch(currentBg, currentText);
-        childrenContainer.appendChild(newElements.branch);
-        newElements.node.focus();
-    }
-    drawLines();
-}
-});
-// Toolbar Preset Swatch Clicks
+
 document.getElementById('toolbar').addEventListener('click', function(e) {
-if (e.target.classList.contains('swatch')) {
-const selectedColor = e.target.dataset.color;
-if (e.target.closest('#bg-swatches') && activeNode) {
-        activeNode.style.backgroundColor = selectedColor;
-        activeNode.dataset.bg = selectedColor;
-        document.getElementById('bg-color-custom').value = selectedColor;
-    } 
-    else if (e.target.closest('#text-swatches') && activeNode) {
-        activeNode.style.color = selectedColor;
-        activeNode.dataset.text = selectedColor;
-        document.getElementById('text-color-custom').value = selectedColor;
+    if (e.target.classList.contains('swatch')) {
+        const selectedColor = e.target.dataset.color;
+        if (e.target.closest('#bg-swatches') && activeNode) {
+            activeNode.style.backgroundColor = selectedColor;
+            activeNode.dataset.bg = selectedColor;
+            document.getElementById('bg-color-custom').value = selectedColor;
+        } 
+        else if (e.target.closest('#text-swatches') && activeNode) {
+            activeNode.style.color = selectedColor;
+            activeNode.dataset.text = selectedColor;
+            document.getElementById('text-color-custom').value = selectedColor;
+        }
     }
-}
 });
-// Toolbar Custom Color Pickers
+
 document.getElementById('bg-color-custom').addEventListener('input', function(e) {
-if (activeNode) {
-activeNode.style.backgroundColor = e.target.value;
-activeNode.dataset.bg = e.target.value;
-}
+    if (activeNode) {
+        activeNode.style.backgroundColor = e.target.value;
+        activeNode.dataset.bg = e.target.value;
+    }
 });
+
 document.getElementById('text-color-custom').addEventListener('input', function(e) {
-if (activeNode) {
-activeNode.style.color = e.target.value;
-activeNode.dataset.text = e.target.value;
-}
+    if (activeNode) {
+        activeNode.style.color = e.target.value;
+        activeNode.dataset.text = e.target.value;
+    }
 });
-// Window Resize Redraw
+
 window.addEventListener('resize', drawLines);
-// Initialization
+
 window.onload = () => {
-const rootNode = document.querySelector('.node');
-selectNode(rootNode);
-rootNode.focus();
-drawLines();
+    const rootNode = document.querySelector('.node');
+    if (rootNode) {
+        selectNode(rootNode);
+        rootNode.focus();
+        drawLines();
+    }
 };
