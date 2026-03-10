@@ -4,8 +4,9 @@ let nodeCounter = 1;
 let activeNode = null;
 
 const CANVAS = document.getElementById('canvas');
+const WRAPPER = document.getElementById('canvas-wrapper');
 
-// --- Tab Management ---
+// --- 1. Tab Management ---
 
 function initApp() {
     createNewTab("Default Chart");
@@ -21,7 +22,7 @@ function createNewTab(name) {
             <div class="branch" id="root">
                 <div class="left-wing"></div>
                 <div class="node-container">
-                    <div class="node active" contenteditable="true" data-id="node-1" data-bg="#ffffff" data-text="#000000" data-placeholder="Root Node"></div>
+                    <div class="node active" contenteditable="true" data-id="node-1" data-bg="#ffffff" data-text="#000000"></div>
                     <div class="controls">
                         <button class="btn-add btn-left" title="Add Left Child">⬅️</button>
                         <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
@@ -34,10 +35,15 @@ function createNewTab(name) {
     };
     tabs.push(newTab);
     switchTab(id);
+    
+    // Initial centering of scroll
+    setTimeout(() => {
+        WRAPPER.scrollLeft = (CANVAS.offsetWidth - WRAPPER.offsetWidth) / 2;
+        WRAPPER.scrollTop = (CANVAS.offsetHeight - WRAPPER.offsetHeight) / 2;
+    }, 100);
 }
 
 function switchTab(id) {
-    // Save current
     if (activeTabId) {
         const current = tabs.find(t => t.id === activeTabId);
         if (current) current.html = CANVAS.innerHTML;
@@ -47,9 +53,8 @@ function switchTab(id) {
     const target = tabs.find(t => t.id === id);
     CANVAS.innerHTML = target.html;
 
-    // Re-bind active node
-    const node = CANVAS.querySelector('.node.active');
-    if (node) selectNode(node);
+    const savedActiveNode = CANVAS.querySelector('.node.active') || CANVAS.querySelector('.node');
+    if (savedActiveNode) selectNode(savedActiveNode);
 
     renderTabBar();
     setTimeout(drawLines, 10);
@@ -61,12 +66,22 @@ function renderTabBar() {
     tabs.forEach(tab => {
         const el = document.createElement('div');
         el.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
-        el.innerHTML = `<span>${tab.name}</span><span class="tab-close" data-id="${tab.id}">✕</span>`;
+        
+        const label = document.createElement('span');
+        label.className = 'tab-label';
+        label.contentEditable = true;
+        label.textContent = tab.name;
+        label.oninput = (e) => tab.name = e.target.textContent;
+        label.onclick = (e) => e.stopPropagation();
+
+        const closeBtn = document.createElement('span');
+        closeBtn.className = 'tab-close';
+        closeBtn.textContent = ' ✕';
+        closeBtn.onclick = (e) => { e.stopPropagation(); closeTab(tab.id); };
+
         el.onclick = () => switchTab(tab.id);
-        el.querySelector('.tab-close').onclick = (e) => {
-            e.stopPropagation();
-            closeTab(tab.id);
-        };
+        el.appendChild(label);
+        el.appendChild(closeBtn);
         bar.appendChild(el);
     });
 }
@@ -78,12 +93,13 @@ function closeTab(id) {
     else renderTabBar();
 }
 
-// --- Core Functionality ---
+// --- 2. Chart Core Logic ---
 
 function selectNode(node) {
     if (activeNode) activeNode.classList.remove('active');
     activeNode = node;
     activeNode.classList.add('active');
+    
     document.getElementById('bg-color-custom').value = node.dataset.bg || "#ffffff";
     document.getElementById('text-color-custom').value = node.dataset.text || "#000000";
 }
@@ -92,11 +108,12 @@ function createBranch(bgColor = "#ffffff", textColor = "#000000") {
     nodeCounter++;
     const branch = document.createElement('div');
     branch.className = 'branch';
-    
     const id = `node-${Date.now()}-${nodeCounter}`;
     branch.innerHTML = `
         <div class="node-container">
-            <div class="node" contenteditable="true" data-id="${id}" data-bg="${bgColor}" data-text="${textColor}" style="background-color:${bgColor}; color:${textColor}"></div>
+            <div class="node" contenteditable="true" data-id="${id}" 
+                 data-bg="${bgColor}" data-text="${textColor}" 
+                 style="background-color:${bgColor}; color:${textColor}"></div>
             <div class="controls">
                 <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
                 <button class="btn-add btn-child" title="Add Child">➡️</button>
@@ -111,39 +128,33 @@ function drawLines() {
     const svg = document.getElementById('connections');
     if (!svg) return;
     svg.innerHTML = '';
-    const svgRect = svg.getBoundingClientRect();
-    
-    // Scale SVG to match scrollable area
     svg.setAttribute('width', CANVAS.scrollWidth);
     svg.setAttribute('height', CANVAS.scrollHeight);
+    const svgRect = svg.getBoundingClientRect();
 
     document.querySelectorAll('.branch').forEach(branch => {
         const parentNode = branch.querySelector(':scope > .node-container > .node');
         if (!parentNode) return;
 
         const parentRect = parentNode.getBoundingClientRect();
-        
-        // Find all possible child containers (Left Wing, Right Wing, or standard Children)
         const childContainers = branch.querySelectorAll(':scope > .children, :scope > .left-wing, :scope > .right-wing');
 
         childContainers.forEach(container => {
-            const isLeft = container.classList.contains('left-wing') || container.closest('.left-wing');
-            const children = container.querySelectorAll(':scope > .branch > .node-container > .node');
+            const isLeftLineage = container.classList.contains('left-wing') || container.closest('.left-wing');
+            const childrenNodes = container.querySelectorAll(':scope > .branch > .node-container > .node');
 
-            children.forEach(child => {
+            childrenNodes.forEach(child => {
                 const childRect = child.getBoundingClientRect();
                 
-                // Calculate start and end points relative to SVG
-                const startX = (isLeft ? parentRect.left : parentRect.right) - svgRect.left;
+                // Logic: Left lineage lines start at left side of parent, end at right side of child
+                const startX = (isLeftLineage ? parentRect.left : parentRect.right) - svgRect.left;
                 const startY = (parentRect.top + parentRect.height / 2) - svgRect.top;
-                const endX = (isLeft ? childRect.right : childRect.left) - svgRect.left;
+                const endX = (isLeftLineage ? childRect.right : childRect.left) - svgRect.left;
                 const endY = (childRect.top + childRect.height / 2) - svgRect.top;
 
                 const cp1x = startX + (endX - startX) * 0.5;
-                const cp2x = startX + (endX - startX) * 0.5;
-
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M ${startX} ${startY} C ${cp1x} ${startY}, ${cp2x} ${endY}, ${endX} ${endY}`);
+                path.setAttribute('d', `M ${startX} ${startY} C ${cp1x} ${startY}, ${cp1x} ${endY}, ${endX} ${endY}`);
                 path.setAttribute('fill', 'none');
                 path.setAttribute('stroke', '#cbd5e0');
                 path.setAttribute('stroke-width', '2');
@@ -153,21 +164,41 @@ function drawLines() {
     });
 }
 
-// --- Listeners ---
+// --- 3. Event Handling ---
 
-CANVAS.addEventListener('focusin', e => e.target.classList.contains('node') && selectNode(e.target));
+CANVAS.addEventListener('click', e => {
+    if (!e.target.classList.contains('btn-add')) return;
+    const currentBranch = e.target.closest('.branch');
+    const { branch: newBr, node: newNode } = createBranch(activeNode.dataset.bg, activeNode.dataset.text);
+    
+    if (e.target.classList.contains('btn-left')) {
+        currentBranch.querySelector('.left-wing').appendChild(newBr);
+    } else if (e.target.classList.contains('btn-child')) {
+        const targetContainer = currentBranch.id === 'root' ? 
+                                currentBranch.querySelector('.right-wing') : 
+                                currentBranch.querySelector('.children');
+        targetContainer.appendChild(newBr);
+    } else if (e.target.classList.contains('btn-sibling')) {
+        if (currentBranch.id !== 'root') currentBranch.parentNode.insertBefore(newBr, currentBranch.nextSibling);
+    }
+    newNode.focus();
+    drawLines();
+});
 
 CANVAS.addEventListener('keydown', e => {
     if (!activeNode) return;
     const branch = activeNode.closest('.branch');
-    const isLeft = activeNode.closest('.left-wing');
 
     if (e.key === 'Tab') {
         e.preventDefault();
-        const wingClass = e.shiftKey ? '.left-wing' : (branch.id === 'root' ? '.right-wing' : '.children');
-        const container = branch.querySelector(wingClass);
         const { branch: newBr, node } = createBranch(activeNode.dataset.bg, activeNode.dataset.text);
-        container.appendChild(newBr);
+        if (e.shiftKey) {
+            const container = branch.id === 'root' ? branch.querySelector('.left-wing') : branch.querySelector('.children');
+            container.appendChild(newBr);
+        } else {
+            const container = branch.id === 'root' ? branch.querySelector('.right-wing') : branch.querySelector('.children');
+            container.appendChild(newBr);
+        }
         node.focus();
         drawLines();
     }
@@ -184,38 +215,36 @@ CANVAS.addEventListener('keydown', e => {
     if (e.key === 'Backspace' && activeNode.textContent === '') {
         if (branch.id === 'root') return;
         e.preventDefault();
+        const prevSibling = branch.previousElementSibling;
         const parentNode = branch.parentNode.closest('.branch')?.querySelector('.node');
         branch.remove();
-        if (parentNode) parentNode.focus();
+        if (prevSibling) prevSibling.querySelector('.node').focus();
+        else if (parentNode) parentNode.focus();
         drawLines();
     }
 });
 
-CANVAS.addEventListener('click', e => {
-    if (!e.target.classList.contains('btn-add')) return;
-    const branch = e.target.closest('.branch');
-    const { branch: newBr, node } = createBranch(activeNode.dataset.bg, activeNode.dataset.text);
-    
-    if (e.target.classList.contains('btn-child')) {
-        branch.querySelector(branch.id === 'root' ? '.right-wing' : '.children').appendChild(newBr);
-    } else if (e.target.classList.contains('btn-left')) {
-        branch.querySelector('.left-wing').appendChild(newBr);
-    } else if (e.target.classList.contains('btn-sibling')) {
-        if (branch.id !== 'root') branch.parentNode.insertBefore(newBr, branch.nextSibling);
+// Toolbar Listeners
+document.getElementById('btn-add-tab').onclick = () => createNewTab("New Chart");
+
+document.getElementById('toolbar').addEventListener('click', e => {
+    if (e.target.classList.contains('swatch') && activeNode) {
+        const color = e.target.dataset.color;
+        if (e.target.closest('#bg-swatches')) {
+            activeNode.style.backgroundColor = color;
+            activeNode.dataset.bg = color;
+        } else {
+            activeNode.style.color = color;
+            activeNode.dataset.text = color;
+        }
     }
-    node.focus();
-    drawLines();
 });
 
-document.getElementById('btn-add-tab').onclick = () => createNewTab("New Chart");
-document.getElementById('bg-swatches').onclick = e => {
-    if (e.target.dataset.color && activeNode) {
-        activeNode.style.backgroundColor = e.target.dataset.color;
-        activeNode.dataset.bg = e.target.dataset.color;
-    }
+document.getElementById('bg-color-custom').oninput = e => {
+    if (activeNode) { activeNode.style.backgroundColor = e.target.value; activeNode.dataset.bg = e.target.value; }
+};
+document.getElementById('text-color-custom').oninput = e => {
+    if (activeNode) { activeNode.style.color = e.target.value; activeNode.dataset.text = e.target.value; }
 };
 
-window.addEventListener('resize', drawLines);
-CANVAS.addEventListener('input', drawLines);
-
-window.onload = initApp;
+CANVAS.addEventListener('focusin', e => e.target.classList.contains('nod
