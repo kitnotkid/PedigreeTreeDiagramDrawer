@@ -69,22 +69,23 @@ body {
     border-radius: 4px;
 }
 
-/* --- Layout Engine --- */
+/* --- Canvas & Centering --- */
 #canvas-wrapper {
     width: 100vw;
     height: 100vh;
     overflow: auto;
     padding-top: 60px;
+    display: block; /* Ensure it scrolls correctly */
 }
 
 #canvas {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* Horizontally center the root */
+    align-items: center;     /* Vertically center the root */
     min-width: 100%;
     min-height: calc(100vh - 60px);
     position: relative;
-    padding: 200px; /* Space for expansion */
+    padding: 1000px; /* Massive padding allows unlimited growth in all directions */
 }
 
 #connections {
@@ -97,75 +98,71 @@ body {
     z-index: 1;
 }
 
-/* --- Bi-Directional Branching --- */
+/* --- The Root Structure --- */
+#root {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Force wings to be equal width to keep Root centered */
+.left-wing, .right-wing {
+    display: flex;
+    flex-direction: column;
+    flex: 1; 
+    min-width: 300px; /* Ensures space for lines */
+}
+
+.left-wing { align-items: flex-end; }
+.right-wing { align-items: flex-start; }
+
+/* --- Recursive Branching --- */
 .branch {
     display: flex;
     align-items: center;
     position: relative;
+    margin: 5px 0;
 }
 
-/* Standard/Right Wing */
-.right-wing, .children {
-    display: flex;
-    flex-direction: column;
-    margin-left: 60px;
-}
-
-/* Left Wing */
-.left-wing {
-    display: flex;
-    flex-direction: column;
-    margin-right: 60px;
-}
-
-/* Flip direction for anything inside left-wing */
+/* This handles the infinite left-growth */
 .left-wing .branch {
     flex-direction: row-reverse;
 }
 
-/* --- Node Styling --- */
-.node-container {
-    position: relative;
-    z-index: 2;
+.children {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
+/* Spacing between nodes */
+.left-wing .children { margin-right: 60px; }
+.right-wing .children, .children { margin-left: 60px; }
+
+/* --- Tabs UI --- */
+.tab-label {
+    outline: none;
+    min-width: 20px;
+    display: inline-block;
+}
+
+.tab-label:focus {
+    background: rgba(255,255,255,0.5);
+    border-bottom: 1px solid #999;
+}
+
+/* Rest of your existing node and toolbar styles... */
+.node-container { position: relative; z-index: 2; }
 .node {
     min-width: 120px;
-    padding: 12px;
+    padding: 10px;
     background: white;
     border: 2px solid #333;
     border-radius: 6px;
-    outline: none;
     text-align: center;
-    transition: box-shadow 0.2s;
+    outline: none;
 }
-
-.node.active {
-    border-color: #ffaa00;
-    box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.4);
-}
-
-/* --- Controls --- */
-.controls {
-    display: none;
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    gap: 4px;
-    background: white;
-    padding: 2px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+.node.active { border-color: #ffaa00; box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.3); }
+.controls { display: none; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); gap: 4px; background: white; border: 1px solid #ccc; padding: 2px; border-radius: 4px; }
 .node-container:hover .controls { display: flex; }
-
-.btn-add { cursor: pointer; border: 1px solid #ddd; background: #fff; border-radius: 3px; }
-.btn-add:hover { background: #f0f0f0; }
-
-/* Utils */
-.toolbar-divider { width: 1px; height: 30px; background: #ddd; }
-.color-swatches { display: flex; gap: 4px; }
-.swatch { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ccc; cursor: pointer; }
-.custom-picker-wrapper { position: relative; cursor: pointer; }
-.custom-picker-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.btn-add { cursor: pointer; border: 1px solid #ddd; background: #fff; }
