@@ -114,55 +114,122 @@ selectNode(e.target);
 }
 });
 // Keyboard Controls (Tab, Enter, Backspace)
+// --- EVENT LISTENERS ---
+
+// Keyboard Controls (Tab, Enter, Backspace)
 document.getElementById('canvas').addEventListener('keydown', function(e) {
-if (!e.target.classList.contains('node')) return;
+    if (!e.target.classList.contains('node')) return;
 
-const currentNode = e.target;
-const currentBranch = currentNode.closest('.branch');
+    const currentNode = e.target;
+    const currentBranch = currentNode.closest('.branch');
+    
+    // Grab colors for inheritance
+    const currentBg = currentNode.dataset.bg;
+    const currentText = currentNode.dataset.text;
 
-// Grab colors for inheritance
-const currentBg = currentNode.dataset.bg;
-const currentText = currentNode.dataset.text;
+    // Shift + Enter = New Line in text
+    if (e.key === 'Enter' && e.shiftKey) {
+        setTimeout(drawLines, 10);
+        return; 
+    }
 
-if (e.key === 'Enter' && e.shiftKey) {
-    setTimeout(drawLines, 10);
-    return; 
-}
-
-if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault(); 
-    if (currentBranch.id === 'root') return; 
-    const newElements = createBranch(currentBg, currentText); 
-    currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
-    newElements.node.focus();
-    drawLines();
-}
-
-if (e.key === 'Tab') {
-    e.preventDefault(); 
-    const childrenContainer = currentBranch.querySelector('.children');
-    const newElements = createBranch(currentBg, currentText); 
-    childrenContainer.appendChild(newElements.branch);
-    newElements.node.focus();
-    drawLines();
-}
-
-if (e.key === 'Backspace') {
-    if (currentNode.textContent.trim() === '') {
-        e.preventDefault();
-        if (currentBranch.id === 'root') return; 
-        
-        const prevSibling = currentBranch.previousElementSibling;
-        const parentNode = currentBranch.parentElement.closest('.branch')?.querySelector('.node');
-        
-        currentBranch.remove(); 
-
-        if (prevSibling) prevSibling.querySelector('.node').focus();
-        else if (parentNode) parentNode.focus();
-        
+    // Enter = Add Sibling
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); 
+        if (currentBranch.id === 'root') return; // Root cannot have siblings
+        const newElements = createBranch(currentBg, currentText); 
+        currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
+        newElements.node.focus();
         drawLines();
     }
-}
+
+    // Tab = Add Right Child (or normal child if not root)
+    if (e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault(); 
+        let childrenContainer = currentBranch.id === 'root' 
+            ? currentBranch.querySelector('.wing-right') 
+            : currentBranch.querySelector(':scope > .children');
+            
+        const newElements = createBranch(currentBg, currentText); 
+        childrenContainer.appendChild(newElements.branch);
+        newElements.node.focus();
+        drawLines();
+    }
+
+    // Shift + Tab = Add Left Child (or normal child if not root)
+    if (e.key === 'Tab' && e.shiftKey) {
+        e.preventDefault();
+        let childrenContainer = currentBranch.id === 'root' 
+            ? currentBranch.querySelector('.wing-left') 
+            : currentBranch.querySelector(':scope > .children');
+            
+        const newElements = createBranch(currentBg, currentText); 
+        childrenContainer.appendChild(newElements.branch);
+        newElements.node.focus();
+        drawLines();
+    }
+
+    // Backspace = Delete empty node
+    if (e.key === 'Backspace') {
+        if (currentNode.textContent.trim() === '') {
+            e.preventDefault();
+            if (currentBranch.id === 'root') return; 
+            
+            const prevSibling = currentBranch.previousElementSibling;
+            const parentNode = currentBranch.parentElement.closest('.branch')?.querySelector('.node');
+            
+            currentBranch.remove(); 
+
+            if (prevSibling) prevSibling.querySelector('.node').focus();
+            else if (parentNode) parentNode.focus();
+            
+            drawLines();
+        }
+    }
+});
+
+// Redraw lines on typing
+document.getElementById('canvas').addEventListener('input', drawLines);
+
+// Hover UI Button Clicks (Arrows)
+document.getElementById('canvas').addEventListener('click', function(e) {
+    // We now have to account for the new left/right root buttons
+    if (e.target.classList.contains('btn-sibling') || 
+        e.target.classList.contains('btn-child') ||
+        e.target.classList.contains('btn-child-left') ||
+        e.target.classList.contains('btn-child-right')) {
+        
+        const currentBranch = e.target.closest('.branch');
+        const parentNode = currentBranch.querySelector(':scope > .node-container > .node');
+        const currentBg = parentNode.dataset.bg;
+        const currentText = parentNode.dataset.text;
+
+        if (e.target.classList.contains('btn-sibling')) {
+            if (currentBranch.id === 'root') return;
+            const newElements = createBranch(currentBg, currentText);
+            currentBranch.parentElement.insertBefore(newElements.branch, currentBranch.nextSibling);
+            newElements.node.focus();
+        } 
+        else if (e.target.classList.contains('btn-child-left')) {
+            const childrenContainer = currentBranch.querySelector('.wing-left');
+            const newElements = createBranch(currentBg, currentText);
+            childrenContainer.appendChild(newElements.branch);
+            newElements.node.focus();
+        }
+        else if (e.target.classList.contains('btn-child-right')) {
+            const childrenContainer = currentBranch.querySelector('.wing-right');
+            const newElements = createBranch(currentBg, currentText);
+            childrenContainer.appendChild(newElements.branch);
+            newElements.node.focus();
+        }
+        else { // Normal btn-child
+            const childrenContainer = currentBranch.querySelector(':scope > .children');
+            const newElements = createBranch(currentBg, currentText);
+            childrenContainer.appendChild(newElements.branch);
+            newElements.node.focus();
+        }
+        drawLines();
+    }
 });
 // Redraw lines on typing
 document.getElementById('canvas').addEventListener('input', drawLines);
