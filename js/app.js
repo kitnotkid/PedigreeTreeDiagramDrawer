@@ -13,6 +13,65 @@ let currentTabId = 'tab-1';
 let nodeCounter = 1;
 let activeNode = null; 
 
+// --- TAB LOGIC ---
+function saveCurrentTab() {
+    const currentTabData = tabsData.find(t => t.id === currentTabId);
+    if (currentTabData) {
+        currentTabData.html = document.getElementById('canvas').innerHTML;
+        currentTabData.nodeCounter = nodeCounter;
+    }
+}
+
+function loadTab(tabId) {
+    saveCurrentTab(); // Always save the current work before switching!
+    
+    currentTabId = tabId;
+    const tabDataToLoad = tabsData.find(t => t.id === tabId);
+    
+    if (tabDataToLoad) {
+        // Inject the saved HTML back into the canvas
+        document.getElementById('canvas').innerHTML = tabDataToLoad.html;
+        nodeCounter = tabDataToLoad.nodeCounter;
+        
+        // Update the visual appearance of the tabs in the toolbar
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab[data-tab-id="${tabId}"]`).classList.add('active');
+        
+        // Re-focus the root node and redraw the lines
+        activeNode = null;
+        const rootNode = document.querySelector('.node');
+        if (rootNode) {
+            selectNode(rootNode);
+            drawLines();
+        }
+    }
+}
+
+// Tab Click (Switching) & Double Click (Renaming) Listeners
+document.getElementById('tab-container').addEventListener('click', function(e) {
+    if (e.target.classList.contains('tab')) {
+        const clickedTabId = e.target.getAttribute('data-tab-id');
+        if (clickedTabId !== currentTabId) {
+            loadTab(clickedTabId);
+        }
+    }
+});
+
+document.getElementById('tab-container').addEventListener('dblclick', function(e) {
+    if (e.target.classList.contains('tab')) {
+        const currentName = e.target.textContent;
+        const newName = prompt("Rename your chart:", currentName);
+        
+        if (newName && newName.trim() !== "") {
+            e.target.textContent = newName.trim();
+            // Also update the name in our memory array
+            const tabId = e.target.getAttribute('data-tab-id');
+            const tabData = tabsData.find(t => t.id === tabId);
+            if (tabData) tabData.name = newName.trim();
+        }
+    }
+});
+
 // --- Select Node Logic ---
 function selectNode(node) {
     if (activeNode) activeNode.classList.remove('active');
