@@ -101,12 +101,9 @@ body {
 #canvas {
     display: inline-flex;
     align-items: center;
-    min-height: calc(100vh - 50px);
-
-    /* Adjust height for toolbar */
-    margin-top: 100px;
-
-    /*Push down below toolbar */
+    min-height: calc(100vh - 100px); 
+    margin-top: 50px;
+    margin-bottom: 50px; 
     padding: 40px;
     position: relative;
 }
@@ -250,21 +247,16 @@ body {
     color: #000;
 }
 
-
-/* --- NEW: Center-Out Flexbox Logic --- */
 /* The root node needs to be centered on the canvas */
 #canvas {
     justify-content: center;
-    /* Keeps the root in the middle */
 }
 
 /* Wing formatting */
 .wing-left {
     margin-left: 0;
     margin-right: 50px;
-    /* Space between center node and left children */
     align-items: flex-end;
-    /* Align right to push against center */
 }
 
 .wing-right {
@@ -272,12 +264,11 @@ body {
     padding-left: 0;
 }
 
-/* Reverse the flex direction for everything in the left wing */
+
 .wing-left .branch {
     flex-direction: row-reverse;
 }
 
-/* Reverse the children container margin inside the left wing */
 .wing-left .children {
     margin-left: 0;
     margin-right: 50px;
@@ -294,7 +285,6 @@ body {
     background-color: #ffffff;
     border-top: 1px solid #ddd;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
-    /* Shadow goes up */
     display: flex;
     align-items: center;
     padding: 0 20px;
