@@ -1,6 +1,30 @@
 let nodeCounter = 1;
 let activeNode = null; 
 
+// --- WORKSPACE MEMORY ---
+let tabsData = [
+    {
+        id: 'tab-1',
+        name: 'Chart 1',
+        html: '', // We will save the HTML string of the tree here
+        nodeCounter: 1
+    }
+];
+let currentTabId = 'tab-1';
+
+let nodeCounter = 1;
+let activeNode = null; 
+
+// --- Select Node Logic ---
+function selectNode(node) {
+    if (activeNode) activeNode.classList.remove('active');
+    activeNode = node;
+    activeNode.classList.add('active');
+    
+    document.getElementById('bg-color-custom').value = activeNode.dataset.bg;
+    document.getElementById('text-color-custom').value = activeNode.dataset.text;
+}
+
 // --- Select Node Logic ---
 function selectNode(node) {
     if (activeNode) activeNode.classList.remove('active');
@@ -110,12 +134,12 @@ document.getElementById('canvas').addEventListener('focusin', function(e) {
     }
 });
 
+// Keyboard Controls (Fixing Tab / Shift+Tab)
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
 
     const currentNode = e.target;
     const currentBranch = currentNode.closest('.branch');
-    
     const currentBg = currentNode.dataset.bg;
     const currentText = currentNode.dataset.text;
 
@@ -133,24 +157,21 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
         drawLines();
     }
 
-    if (e.key === 'Tab' && !e.shiftKey) {
-        e.preventDefault(); 
-        let childrenContainer = currentBranch.id === 'root' 
-            ? currentBranch.querySelector('.wing-right') 
-            : currentBranch.querySelector(':scope > .children');
-            
-        const newElements = createBranch(currentBg, currentText); 
-        childrenContainer.appendChild(newElements.branch);
-        newElements.node.focus();
-        drawLines();
-    }
-
-    if (e.key === 'Tab' && e.shiftKey) {
+    // NEW: Bulletproof Tab & Shift+Tab logic combined
+    if (e.key === 'Tab') {
         e.preventDefault();
-        let childrenContainer = currentBranch.id === 'root' 
-            ? currentBranch.querySelector('.wing-left') 
-            : currentBranch.querySelector(':scope > .children');
-            
+        
+        // Determine which wing to use if we are on the root node
+        let containerClass = e.shiftKey ? '.wing-left' : '.wing-right';
+        
+        let childrenContainer;
+        if (currentBranch.id === 'root') {
+            childrenContainer = currentBranch.querySelector(containerClass);
+        } else {
+            // Safely find the direct child container without using :scope
+            childrenContainer = Array.from(currentBranch.children).find(el => el.classList.contains('children'));
+        }
+
         const newElements = createBranch(currentBg, currentText); 
         childrenContainer.appendChild(newElements.branch);
         newElements.node.focus();
