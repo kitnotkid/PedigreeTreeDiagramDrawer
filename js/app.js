@@ -23,7 +23,7 @@ function saveCurrentTab() {
 }
 
 function loadTab(tabId) {
-    saveCurrentTab(); // Always save the current work before switching!
+    saveCurrentTab(); // Always save the current work before switching
     
     currentTabId = tabId;
     const tabDataToLoad = tabsData.find(t => t.id === tabId);
@@ -47,9 +47,9 @@ function loadTab(tabId) {
     }
 }
 
-// Tab Click (Switching) & Double Click (Renaming) Listeners
+// 1. Switching Tabs
 document.getElementById('tab-container').addEventListener('click', function(e) {
-    if (e.target.classList.contains('tab')) {
+    if (e.target.classList.contains('tab') && !e.target.isContentEditable) {
         const clickedTabId = e.target.getAttribute('data-tab-id');
         if (clickedTabId !== currentTabId) {
             loadTab(clickedTabId);
@@ -57,19 +57,77 @@ document.getElementById('tab-container').addEventListener('click', function(e) {
     }
 });
 
+// 2. Double-Click to Inline Edit
 document.getElementById('tab-container').addEventListener('dblclick', function(e) {
     if (e.target.classList.contains('tab')) {
-        const currentName = e.target.textContent;
-        const newName = prompt("Rename your chart:", currentName);
-        
-        if (newName && newName.trim() !== "") {
-            e.target.textContent = newName.trim();
-            // Also update the name in our memory array
-            const tabId = e.target.getAttribute('data-tab-id');
-            const tabData = tabsData.find(t => t.id === tabId);
-            if (tabData) tabData.name = newName.trim();
-        }
+        e.target.contentEditable = "true";
+        e.target.focus();
     }
+});
+
+// 3. Prevent "Enter" from making a new line in the tab, and save on Enter
+document.getElementById('tab-container').addEventListener('keydown', function(e) {
+    if (e.target.classList.contains('tab') && e.key === 'Enter') {
+        e.preventDefault(); // Stop the line break
+        e.target.blur(); // Triggers the focusout event below to save
+    }
+});
+
+// 4. Save the new name when clicking away
+document.getElementById('tab-container').addEventListener('focusout', function(e) {
+    if (e.target.classList.contains('tab')) {
+        e.target.contentEditable = "false";
+        const newName = e.target.textContent.trim();
+        const tabId = e.target.getAttribute('data-tab-id');
+        const tabData = tabsData.find(t => t.id === tabId);
+        if (tabData) tabData.name = newName;
+    }
+});
+
+// 5. The "＋" Button Logic
+document.getElementById('btn-add-tab').addEventListener('click', function() {
+    saveCurrentTab(); 
+
+    // Generate a new unique ID
+    const newTabId = 'tab-' + (Date.now()); // Using Date.now() ensures it's always unique
+    const newTabName = 'Chart ' + (tabsData.length + 1);
+
+    // The exact HTML of a blank starting node
+    const blankCanvasHTML = `
+        <svg id="connections"></svg>
+        <div class="branch" id="root">
+            <div class="children wing-left"></div> 
+            <div class="node-container">
+                <div class="node active" contenteditable="true" data-id="node-1" data-placeholder="Starting Node" data-bg="#ffffff" data-text="#000000"></div>
+                <div class="controls">
+                    <button class="btn-add btn-child-left" title="Add Left Child">⬅️</button>
+                    <button class="btn-add btn-child-right" title="Add Right Child">➡️</button>
+                </div>
+            </div>
+            <div class="children wing-right"></div> 
+        </div>
+    `;
+
+    // Add it to our memory array
+    tabsData.push({
+        id: newTabId,
+        name: newTabName,
+        html: blankCanvasHTML,
+        nodeCounter: 1
+    });
+
+    // Create the physical tab button in the HTML toolbar
+    const newTabBtn = document.createElement('div');
+    newTabBtn.className = 'tab';
+    newTabBtn.setAttribute('data-tab-id', newTabId);
+    newTabBtn.textContent = newTabName;
+    
+    // Insert it right before the "+" button
+    const addBtn = document.getElementById('btn-add-tab');
+    addBtn.parentNode.insertBefore(newTabBtn, addBtn);
+
+    // Switch to the newly created tab
+    loadTab(newTabId);
 });
 
 // --- Select Node Logic ---
