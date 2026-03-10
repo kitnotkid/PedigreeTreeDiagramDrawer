@@ -15,9 +15,6 @@
     </div>
 </div>
 
-<div id="canvas">
-    </div>
-
 <div id="bottom-toolbar">
     <div class="tool-group">
         <label>Bg:</label>
@@ -54,7 +51,9 @@
     <svg id="connections"></svg>
     
     <div class="branch" id="root">
-        <div class="children wing-left"></div> <div class="node-container">
+        <div class="children wing-left"></div> 
+        
+        <div class="node-container">
             <div class="node active" contenteditable="true" data-id="node-1" data-placeholder="Starting Node" data-bg="#ffffff" data-text="#000000"></div>
             <div class="controls">
                 <button class="btn-add btn-child-left" title="Add Left Child">⬅️</button>
@@ -62,7 +61,8 @@
             </div>
         </div>
 
-        <div class="children wing-right"></div> </div>
+        <div class="children wing-right"></div> 
+    </div>
 </div>
 
 <script src="js/app.js"></script>
