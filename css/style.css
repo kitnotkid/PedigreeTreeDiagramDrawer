@@ -184,3 +184,73 @@ box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 transition: background 0.2s;
 }
 .btn-add:hover { background: #e0f0ff; border-color: #0066cc; }
+
+/* --- NEW: Tab Bar Styling --- */
+#tab-container {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    background: #f0f0f0;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.tab {
+    padding: 4px 12px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.tab:hover { background: #d0d0d0; }
+
+.tab.active {
+    background: #ffffff;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#btn-add-tab {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    padding: 0 5px;
+}
+#btn-add-tab:hover { color: #000; }
+
+
+/* --- NEW: Center-Out Flexbox Logic --- */
+/* The root node needs to be centered on the canvas */
+#canvas {
+    justify-content: center; /* Keeps the root in the middle */
+}
+
+/* Wing formatting */
+.wing-left {
+    margin-left: 0;
+    margin-right: 50px; /* Space between center node and left children */
+    align-items: flex-end; /* Align right to push against center */
+}
+
+.wing-right {
+    margin-left: 50px;
+    padding-left: 0;
+}
+
+/* Reverse the flex direction for everything in the left wing */
+.wing-left .branch {
+    flex-direction: row-reverse; 
+}
+
+/* Reverse the children container margin inside the left wing */
+.wing-left .children {
+    margin-left: 0;
+    margin-right: 50px;
+    align-items: flex-end;
+}

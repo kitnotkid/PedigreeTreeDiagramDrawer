@@ -45,49 +45,66 @@ branch.appendChild(children);
 return { branch, node };
 }
 // --- SVG Curly Line Drawer ---
+// --- SVG Curly Line Drawer (Updated for Center-Out) ---
 function drawLines() {
-const svg = document.getElementById('connections');
-const canvas = document.getElementById('canvas');
-svg.innerHTML = '';
-svg.style.width = canvas.scrollWidth + 'px';
-svg.style.height = canvas.scrollHeight + 'px';
-
-const branches = document.querySelectorAll('.branch');
-const svgRect = svg.getBoundingClientRect();
-
-branches.forEach(branch => {
-    const parentNode = branch.querySelector(':scope > .node-container > .node');
-    const childrenContainer = branch.querySelector(':scope > .children');
-    const childBranches = childrenContainer.querySelectorAll(':scope > .branch');
+    const svg = document.getElementById('connections');
+    const canvas = document.getElementById('canvas');
+    svg.innerHTML = ''; 
     
-    if (!parentNode || childBranches.length === 0) return;
+    // Ensure SVG covers the entire expanding canvas
+    svg.style.width = canvas.scrollWidth + 'px';
+    svg.style.height = canvas.scrollHeight + 'px';
 
-    const parentRect = parentNode.getBoundingClientRect();
-    const startX = parentRect.right - svgRect.left;
-    const startY = parentRect.top + (parentRect.height / 2) - svgRect.top;
+    const branches = document.querySelectorAll('.branch');
+    const svgRect = svg.getBoundingClientRect();
 
-    childBranches.forEach(childBranch => {
-        const childNode = childBranch.querySelector(':scope > .node-container > .node');
-        if (!childNode) return;
+    branches.forEach(branch => {
+        const parentNode = branch.querySelector(':scope > .node-container > .node');
+        if (!parentNode) return;
 
-        const childRect = childNode.getBoundingClientRect();
-        const endX = childRect.left - svgRect.left;
-        const endY = childRect.top + (childRect.height / 2) - svgRect.top;
+        // The root node has TWO .children containers (wing-left and wing-right)
+        // Regular branches only have ONE .children container
+        const childContainers = branch.querySelectorAll(':scope > .children');
 
-        const controlX1 = startX + (endX - startX) / 2;
-        const controlY1 = startY;
-        const controlX2 = startX + (endX - startX) / 2;
-        const controlY2 = endY;
+        childContainers.forEach(container => {
+            const childBranches = container.querySelectorAll(':scope > .branch');
+            if (childBranches.length === 0) return;
 
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`);
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', '#a0aec0'); 
-        path.setAttribute('stroke-width', '2');
+            // Detect if this specific path is part of the left wing
+            const isLeftWing = container.classList.contains('wing-left') || branch.closest('.wing-left');
 
-        svg.appendChild(path);
+            const parentRect = parentNode.getBoundingClientRect();
+            
+            // Start X changes based on the wing direction
+            const startX = isLeftWing ? (parentRect.left - svgRect.left) : (parentRect.right - svgRect.left);
+            const startY = parentRect.top + (parentRect.height / 2) - svgRect.top;
+
+            childBranches.forEach(childBranch => {
+                const childNode = childBranch.querySelector(':scope > .node-container > .node');
+                if (!childNode) return;
+
+                const childRect = childNode.getBoundingClientRect();
+                
+                // End X changes based on the wing direction
+                const endX = isLeftWing ? (childRect.right - svgRect.left) : (childRect.left - svgRect.left);
+                const endY = childRect.top + (childRect.height / 2) - svgRect.top;
+
+                // Bezier control points remain centered between the two nodes
+                const controlX1 = startX + (endX - startX) / 2;
+                const controlY1 = startY;
+                const controlX2 = startX + (endX - startX) / 2;
+                const controlY2 = endY;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke', '#a0aec0'); 
+                path.setAttribute('stroke-width', '2');
+
+                svg.appendChild(path);
+            });
+        });
     });
-});
 }
 // --- EVENT LISTENERS ---
 // Focus/Click a node to make it active
