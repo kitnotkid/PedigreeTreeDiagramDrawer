@@ -8,19 +8,24 @@
 </head>
 <body>
 
-    <!-- NEW: The Unified Top Toolbar -->
-    <!-- The Unified Top Toolbar -->
     <div id="toolbar">
+        <!-- TAB SYSTEM -->
+        <div id="tab-container">
+            <div id="tab-bar"></div>
+            <button id="btn-add-tab" title="New Chart">+</button>
+        </div>
+
+        <div class="toolbar-divider"></div>
         
-        <!-- Background Color Presets -->
+        <!-- Background Color -->
         <div class="tool-group">
             <label>Bg:</label>
             <div class="color-swatches" id="bg-swatches">
                 <button class="swatch" style="background-color: #ffffff;" data-color="#ffffff"></button>
-                <button class="swatch" style="background-color: #ffebee;" data-color="#ffebee"></button> <!-- Light Red -->
-                <button class="swatch" style="background-color: #e3f2fd;" data-color="#e3f2fd"></button> <!-- Light Blue -->
-                <button class="swatch" style="background-color: #e8f5e9;" data-color="#e8f5e9"></button> <!-- Light Green -->
-                <button class="swatch" style="background-color: #fff8e1;" data-color="#fff8e1"></button> <!-- Light Yellow -->
+                <button class="swatch" style="background-color: #ffebee;" data-color="#ffebee"></button>
+                <button class="swatch" style="background-color: #e3f2fd;" data-color="#e3f2fd"></button>
+                <button class="swatch" style="background-color: #e8f5e9;" data-color="#e8f5e9"></button>
+                <button class="swatch" style="background-color: #fff8e1;" data-color="#fff8e1"></button>
                 <div class="custom-picker-wrapper" title="Custom Background Color">
                     <input type="color" id="bg-color-custom" value="#ffffff">
                     <span>🎨</span>
@@ -30,35 +35,24 @@
 
         <div class="toolbar-divider"></div>
 
-        <!-- Text Color Presets -->
+        <!-- Text Color -->
         <div class="tool-group">
             <label>Text:</label>
             <div class="color-swatches" id="text-swatches">
                 <button class="swatch" style="background-color: #000000;" data-color="#000000"></button>
-                <button class="swatch" style="background-color: #d32f2f;" data-color="#d32f2f"></button> <!-- Red -->
-                <button class="swatch" style="background-color: #1976d2;" data-color="#1976d2"></button> <!-- Blue -->
+                <button class="swatch" style="background-color: #d32f2f;" data-color="#d32f2f"></button>
+                <button class="swatch" style="background-color: #1976d2;" data-color="#1976d2"></button>
                 <div class="custom-picker-wrapper" title="Custom Text Color">
                     <input type="color" id="text-color-custom" value="#000000">
                     <span>🎨</span>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <div id="canvas">
-        <svg id="connections"></svg>
-        
-        <div class="branch" id="root">
-            <div class="node-container">
-                <!-- Added data-bg and data-text to track colors for inheritance -->
-                <div class="node active" contenteditable="true" data-id="node-1" data-placeholder="Starting Node" data-bg="#ffffff" data-text="#000000"></div>
-                <div class="controls">
-                    <button class="btn-add btn-sibling" title="Add Sibling">⬆️</button>
-                    <button class="btn-add btn-child" title="Add Child">➡️</button>
-                </div>
-            </div>
-            <div class="children"></div>
+    <div id="canvas-wrapper">
+        <div id="canvas">
+            <!-- Content dynamically injected by Tab System -->
         </div>
     </div>
 
