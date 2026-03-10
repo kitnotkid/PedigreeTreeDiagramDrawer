@@ -1,61 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pedigree Chart Drawer - MultiTab</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div id="toolbar">
-        <!-- TAB SYSTEM -->
-        <div id="tab-container">
-            <div id="tab-bar"></div>
-            <button id="btn-add-tab" title="New Chart">+</button>
+<!-- Replace the existing #toolbar block with this -->
+<div id="toolbar">
+    <!-- Tab Bar Section -->
+    <div id="tab-container">
+        <div id="tab-list">
+            <!-- Tabs will be injected here -->
         </div>
+        <button id="btn-new-tab" title="New Chart">+</button>
+    </div>
 
-        <div class="toolbar-divider"></div>
-        
-        <!-- Background Color -->
-        <div class="tool-group">
-            <label>Bg:</label>
-            <div class="color-swatches" id="bg-swatches">
-                <button class="swatch" style="background-color: #ffffff;" data-color="#ffffff"></button>
-                <button class="swatch" style="background-color: #ffebee;" data-color="#ffebee"></button>
-                <button class="swatch" style="background-color: #e3f2fd;" data-color="#e3f2fd"></button>
-                <button class="swatch" style="background-color: #e8f5e9;" data-color="#e8f5e9"></button>
-                <button class="swatch" style="background-color: #fff8e1;" data-color="#fff8e1"></button>
-                <div class="custom-picker-wrapper" title="Custom Background Color">
-                    <input type="color" id="bg-color-custom" value="#ffffff">
-                    <span>🎨</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="toolbar-divider"></div>
-
-        <!-- Text Color -->
-        <div class="tool-group">
-            <label>Text:</label>
-            <div class="color-swatches" id="text-swatches">
-                <button class="swatch" style="background-color: #000000;" data-color="#000000"></button>
-                <button class="swatch" style="background-color: #d32f2f;" data-color="#d32f2f"></button>
-                <button class="swatch" style="background-color: #1976d2;" data-color="#1976d2"></button>
-                <div class="custom-picker-wrapper" title="Custom Text Color">
-                    <input type="color" id="text-color-custom" value="#000000">
-                    <span>🎨</span>
-                </div>
+    <div class="toolbar-divider"></div>
+    
+    <!-- Background Color Presets -->
+    <div class="tool-group">
+        <label>Bg:</label>
+        <div class="color-swatches" id="bg-swatches">
+            <button class="swatch" style="background-color: #ffffff;" data-color="#ffffff"></button>
+            <button class="swatch" style="background-color: #ffebee;" data-color="#ffebee"></button>
+            <button class="swatch" style="background-color: #e3f2fd;" data-color="#e3f2fd"></button>
+            <button class="swatch" style="background-color: #e8f5e9;" data-color="#e8f5e9"></button>
+            <button class="swatch" style="background-color: #fff8e1;" data-color="#fff8e1"></button>
+            <div class="custom-picker-wrapper" title="Custom Background Color">
+                <input type="color" id="bg-color-custom" value="#ffffff">
+                <span>🎨</span>
             </div>
         </div>
     </div>
 
-    <div id="canvas-wrapper">
-        <div id="canvas">
-            <!-- Content Injected by JS -->
+    <div class="toolbar-divider"></div>
+
+    <!-- Text Color Presets -->
+    <div class="tool-group">
+        <label>Text:</label>
+        <div class="color-swatches" id="text-swatches">
+            <button class="swatch" style="background-color: #000000;" data-color="#000000"></button>
+            <button class="swatch" style="background-color: #d32f2f;" data-color="#d32f2f"></button>
+            <button class="swatch" style="background-color: #1976d2;" data-color="#1976d2"></button>
+            <div class="custom-picker-wrapper" title="Custom Text Color">
+                <input type="color" id="text-color-custom" value="#000000">
+                <span>🎨</span>
+            </div>
         </div>
     </div>
-
-    <script src="app.js"></script>
-</body>
-</html>
+</div>

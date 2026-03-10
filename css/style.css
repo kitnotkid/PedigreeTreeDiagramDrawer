@@ -1,210 +1,73 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: #f0f2f5;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-/* --- Toolbar & Tabs --- */
-#toolbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
-    background: white;
-    border-bottom: 1px solid #d1d5db;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    z-index: 1000;
-    box-sizing: border-box;
-}
-
+/* --- Tab Bar Styles --- */
 #tab-container {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex: 1;
-    overflow: hidden;
-}
-
-#tab-bar {
-    display: flex;
-    gap: 4px;
+    gap: 5px;
+    flex: 1; /* Allows tab bar to take available space */
     overflow-x: auto;
 }
 
+#tab-list {
+    display: flex;
+    gap: 5px;
+}
+
 .tab {
-    padding: 8px 16px;
-    background: #e5e7eb;
-    border: 1px solid #d1d5db;
-    border-radius: 6px 6px 0 0;
-    cursor: pointer;
-    font-size: 13px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    padding: 5px 12px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
     white-space: nowrap;
+    max-width: 150px;
+    transition: background 0.2s;
 }
 
 .tab.active {
-    background: white;
-    border-bottom-color: white;
-    font-weight: 600;
-    color: #2563eb;
+    background: #fff;
+    border-color: #bbb;
+    border-bottom: 2px solid #ffaa00;
+    font-weight: bold;
 }
 
 .tab-label {
     outline: none;
-    min-width: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tab-close {
-    font-size: 14px;
-    color: #9ca3af;
+    margin-left: 8px;
+    font-size: 10px;
+    color: #999;
 }
 
-.tab-close:hover { color: #ef4444; }
+.tab-close:hover {
+    color: #d32f2f;
+}
 
-#btn-add-tab {
-    background: #4b5563;
+#btn-new-tab {
+    background: #4a5568;
     color: white;
     border: none;
-    padding: 4px 10px;
     border-radius: 4px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
+    font-weight: bold;
 }
 
-/* --- Canvas Engine --- */
-#canvas-wrapper {
-    width: 100vw;
-    height: 100vh;
-    overflow: auto;
-    padding-top: 60px;
-    box-sizing: border-box;
+#btn-new-tab:hover {
+    background: #2d3748;
 }
 
-#canvas {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 4000px; /* Large workspace */
-    min-height: 4000px;
-    position: relative;
-    background: #f8fafc;
+/* Ensure toolbar doesn't squash items */
+#toolbar {
+    overflow-x: auto;
+    justify-content: flex-start;
 }
-
-#connections {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* --- The Root and Wings --- */
-#root {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 5;
-}
-
-.left-wing, .right-wing {
-    display: flex;
-    flex-direction: column;
-    flex: 1; /* This forces the Root to the exact center */
-    min-width: 400px;
-}
-
-.left-wing { align-items: flex-end; }
-.right-wing { align-items: flex-start; }
-
-/* Recursion: Left-side branches flip direction */
-.left-wing .branch {
-    flex-direction: row-reverse;
-}
-
-.branch {
-    display: flex;
-    align-items: center;
-    margin: 10px 0;
-}
-
-.children {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-/* Branch spacing */
-.right-wing .children, .children { margin-left: 60px; }
-.left-wing .children { margin-right: 60px; }
-
-/* --- Nodes --- */
-.node-container {
-    position: relative;
-    z-index: 10;
-}
-
-.node {
-    min-width: 130px;
-    padding: 12px;
-    background: white;
-    border: 2px solid #1e293b;
-    border-radius: 8px;
-    text-align: center;
-    outline: none;
-    font-size: 14px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.node.active {
-    border-color: #f59e0b;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
-}
-
-.node:empty::before {
-    content: "New Node";
-    color: #94a3b8;
-}
-
-/* --- Controls --- */
-.controls {
-    display: none;
-    position: absolute;
-    top: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    gap: 4px;
-    background: white;
-    padding: 4px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.node-container:hover .controls { display: flex; }
-
-.btn-add {
-    cursor: pointer;
-    border: 1px solid #e2e8f0;
-    background: white;
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 12px;
-}
-
-.btn-add:hover { background: #eff6ff; }
-
-/* Utils */
-.toolbar-divider { width: 1px; height: 30px; background: #e5e7eb; margin: 0 10px; }
-.color-swatches { display: flex; gap: 6px; }
-.swatch { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #d1d5db; cursor: pointer; }
-.custom-picker-wrapper { position: relative; width: 22px; height: 22px; background: #f3f4f6; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 1px solid #d1d5db; }
-.custom-picker-wrapper input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
