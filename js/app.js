@@ -1,6 +1,3 @@
-let nodeCounter = 1;
-let activeNode = null; 
-
 // --- WORKSPACE MEMORY ---
 let tabsData = [
     {
@@ -12,18 +9,9 @@ let tabsData = [
 ];
 let currentTabId = 'tab-1';
 
+// Variables declared only ONCE
 let nodeCounter = 1;
 let activeNode = null; 
-
-// --- Select Node Logic ---
-function selectNode(node) {
-    if (activeNode) activeNode.classList.remove('active');
-    activeNode = node;
-    activeNode.classList.add('active');
-    
-    document.getElementById('bg-color-custom').value = activeNode.dataset.bg;
-    document.getElementById('text-color-custom').value = activeNode.dataset.text;
-}
 
 // --- Select Node Logic ---
 function selectNode(node) {
@@ -134,7 +122,7 @@ document.getElementById('canvas').addEventListener('focusin', function(e) {
     }
 });
 
-// Keyboard Controls (Fixing Tab / Shift+Tab)
+// Keyboard Controls
 document.getElementById('canvas').addEventListener('keydown', function(e) {
     if (!e.target.classList.contains('node')) return;
 
@@ -157,18 +145,15 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
         drawLines();
     }
 
-    // NEW: Bulletproof Tab & Shift+Tab logic combined
     if (e.key === 'Tab') {
         e.preventDefault();
         
-        // Determine which wing to use if we are on the root node
         let containerClass = e.shiftKey ? '.wing-left' : '.wing-right';
-        
         let childrenContainer;
+        
         if (currentBranch.id === 'root') {
             childrenContainer = currentBranch.querySelector(containerClass);
         } else {
-            // Safely find the direct child container without using :scope
             childrenContainer = Array.from(currentBranch.children).find(el => el.classList.contains('children'));
         }
 
@@ -198,6 +183,7 @@ document.getElementById('canvas').addEventListener('keydown', function(e) {
 
 document.getElementById('canvas').addEventListener('input', drawLines);
 
+// Hover UI Button Clicks (Arrows)
 document.getElementById('canvas').addEventListener('click', function(e) {
     if (e.target.classList.contains('btn-sibling') || 
         e.target.classList.contains('btn-child') ||
@@ -237,7 +223,8 @@ document.getElementById('canvas').addEventListener('click', function(e) {
     }
 });
 
-document.getElementById('toolbar').addEventListener('click', function(e) {
+// Color Picker Logic
+document.getElementById('bottom-toolbar').addEventListener('click', function(e) {
     if (e.target.classList.contains('swatch')) {
         const selectedColor = e.target.dataset.color;
         if (e.target.closest('#bg-swatches') && activeNode) {
