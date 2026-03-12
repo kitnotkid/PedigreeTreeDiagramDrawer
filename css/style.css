@@ -1,12 +1,22 @@
+/* ============================================================
+   BASE RESET & BODY
+   ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: sans-serif;
-    background-color: #f4f4f9;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: #f0f2f5;
     margin: 0;
     padding: 0;
     overflow: auto;
     min-height: 100vh;
 }
 
+/* ============================================================
+   TOP TOOLBAR
+   ============================================================ */
 #toolbar {
     position: fixed;
     top: 0;
@@ -15,267 +25,120 @@ body {
     height: 50px;
     background-color: #ffffff;
     border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 16px;
     z-index: 100;
-    box-sizing: border-box;
     gap: 20px;
 }
 
 .tool-group {
     display: flex;
-    gap: 15px;
+    gap: 8px;
     align-items: center;
-    font-size: 14px;
-    color: #333;
+    font-size: 13px;
+    color: #444;
+    font-weight: 500;
 }
 
-.tool-group input[type="color"] {
-    cursor: pointer;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    height: 24px;
-    width: 30px;
-    padding: 0;
-}
 
-.toolbar-divider {
-    width: 1px;
-    height: 30px;
-    background-color: #ddd;
-    margin: 0 10px;
-}
-
-.color-swatches {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-.swatch {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.1s, border-color 0.1s;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.swatch:hover {
-    transform: scale(1.15);
-    border-color: #333;
-}
-
-.custom-picker-wrapper {
-    position: relative;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: #f0f0f0;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-}
-
-.custom-picker-wrapper:hover {
-    background: #e0e0e0;
-}
-
-.custom-picker-wrapper input[type="color"] {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-#canvas {
-    display: inline-flex;
-    align-items: center;
-    min-height: calc(100vh - 100px); 
-    margin-top: 50px;
-    margin-bottom: 50px; 
-    padding: 40px;
-    position: relative;
-}
-
-/* --- The SVG Background for Curly Lines --- */
-#connections {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-    overflow: visible;
-}
-
-/* --- Tree Structural Formatting --- */
-.branch {
-    display: flex;
-    align-items: center;
-    position: relative;
-    margin: 10px 0;
-}
-
-.children {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-left: 50px;
-    padding-left: 0;
-}
-
-/* --- Node Formatting --- */
-.node-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    z-index: 2;
-}
-
-.node {
-    min-width: 100px;
-    min-height: 24px;
-    padding: 10px;
-    background-color: #ffffff;
-    color: #000000;
-    border: 2px solid #333;
-    border-radius: 8px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    outline: none;
-    cursor: text;
-    white-space: pre-wrap;
-    transition: all 0.2s;
-    /* Smooth color changes */
-}
-
-/* NEW: Highlight the actively selected node */
-.node.active {
-    border-color: #ffaa00;
-    /* Orange highlight */
-    box-shadow: 0 0 0 3px rgba(255, 170, 0, 0.3);
-}
-
-.node:empty::before {
-    content: attr(data-placeholder);
-    color: #999;
-    pointer-events: none;
-}
-
-/* --- Hover Buttons (Arrows) --- */
-.controls {
-    display: none;
-    position: absolute;
-    top: -15px;
-    right: -10px;
-    gap: 5px;
-    z-index: 10;
-}
-
-.node-container:hover .controls {
-    display: flex;
-}
-
-.btn-add {
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 2px 5px;
-    font-size: 14px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background 0.2s;
-}
-
-.btn-add:hover {
-    background: #e0f0ff;
-    border-color: #0066cc;
-}
-
-/* --- NEW: Tab Bar Styling --- */
+/* ============================================================
+   TAB BAR
+   ============================================================ */
 #tab-container {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     align-items: center;
-    background: #f0f0f0;
-    padding: 5px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    /* No outer background — tabs float directly on the toolbar */
 }
 
 .tab {
-    padding: 4px 12px;
-    background: #e0e0e0;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    background: #f0f0f0;
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
     font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    color: #555;
+    white-space: nowrap;
+    min-width: 64px;
+    text-align: center;
+    /* Allow inline editing without layout shift */
+    outline: none;
 }
 
 .tab:hover {
-    background: #d0d0d0;
+    background: #e4e4e4;
+    border-color: #bbb;
+    color: #222;
 }
 
 .tab.active {
     background: #ffffff;
-    font-weight: bold;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-color: #bbb;
+    border-bottom-color: #ffffff; /* visually "lifts" the active tab */
+    font-weight: 600;
+    color: #111;
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* While a tab is being renamed (contenteditable=true) */
+.tab[contenteditable="true"] {
+    background: #fffbe6;
+    border-color: #f0c040;
+    color: #000;
+    cursor: text;
+    box-shadow: 0 0 0 2px rgba(240, 192, 64, 0.3);
 }
 
 #btn-add-tab {
     background: none;
-    border: none;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
-    color: #666;
-    padding: 0 5px;
+    color: #777;
+    padding: 3px 9px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
 }
 
 #btn-add-tab:hover {
-    color: #000;
+    background: #e8f0fe;
+    border-color: #4285f4;
+    color: #1a73e8;
 }
 
-/* The root node needs to be centered on the canvas */
-#canvas {
-    justify-content: center;
+.tab-name {
+    outline: none;
+    min-width: 30px;
 }
 
-/* Wing formatting */
-.wing-left {
-    margin-left: 0;
-    margin-right: 50px;
-    align-items: flex-end;
+.btn-close-tab {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    border-radius: 4px;
 }
 
-.wing-right {
-    margin-left: 50px;
-    padding-left: 0;
+.btn-close-tab:hover {
+    color: #d32f2f;
+    background-color: #ffebee;
 }
-
-
-.wing-left .branch {
-    flex-direction: row-reverse;
-}
-
-.wing-left .children {
-    margin-left: 0;
-    margin-right: 50px;
-    align-items: flex-end;
-}
-
-/* --- NEW: Bottom Toolbar Styling --- */
+/* ============================================================
+   BOTTOM TOOLBAR
+   ============================================================ */
 #bottom-toolbar {
     position: fixed;
     bottom: 0;
@@ -289,6 +152,330 @@ body {
     align-items: center;
     padding: 0 20px;
     z-index: 100;
-    box-sizing: border-box;
-    gap: 20px;
+    gap: 16px;
 }
+
+.toolbar-divider {
+    width: 1px;
+    height: 28px;
+    background-color: #ddd;
+    flex-shrink: 0;
+}
+
+.color-swatches {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.swatch {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.15);
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.12s, box-shadow 0.12s;
+    flex-shrink: 0;
+}
+
+.swatch:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 2px #333;
+}
+
+.custom-picker-wrapper {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #f4f4f4;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.custom-picker-wrapper:hover {
+    background: #e8e8e8;
+}
+
+.custom-picker-wrapper input[type="color"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+}
+
+/* ============================================================
+   CANVAS
+   ============================================================
+   The canvas uses inline-flex + justify-content: center so the
+   root node always starts centered. It must be wide enough to
+   expand in both directions — padding gives breathing room.
+   ============================================================ */
+#canvas {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* Full viewport minus both toolbars, plus extra for scroll */
+    min-width: 100vw;
+    min-height: calc(100vh - 100px);
+    margin-top: 50px;
+    margin-bottom: 50px;
+    padding: 60px 80px;
+    position: relative;
+    /* Allow horizontal scroll when the tree overflows */
+    overflow: visible;
+}
+
+/* ============================================================
+   SVG CONNECTOR LAYER
+   ============================================================ */
+#connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* Size is set dynamically by JS to match canvas scroll dimensions */
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+}
+
+/* ============================================================
+   BRANCH — the core layout unit
+   ============================================================
+   Each .branch holds:
+     [optional .children.wing-left]  [.node-container]  [optional .children]
+
+   For root:   wing-left | node | wing-right
+   For others: node-container | children  (or reversed in left wing)
+   ============================================================ */
+.branch {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: relative;
+    /* Vertical gap between sibling branches */
+    margin: 8px 0;
+}
+
+/* ============================================================
+   CHILDREN CONTAINERS
+   ============================================================ */
+.children {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* children stack top-to-bottom */
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 56px;
+}
+
+/* --- RIGHT WING (default Tab behaviour) --- */
+.wing-right {
+    margin-right: 56px;
+    align-items: flex-start;
+}
+
+/* --- LEFT WING (Shift+Tab behaviour) --- */
+/*
+   The left wing flips the entire sub-tree horizontally:
+   • The .children container sits to the LEFT of its parent node
+   • flex-direction: row-reverse on every .branch inside flips children left
+   • align-items: flex-end aligns the right edge of child nodes
+*/
+.wing-left {
+    margin-right: 56px;
+    align-items: flex-end; /* right-align children so they grow leftward */
+}
+
+/* Every branch INSIDE the left wing renders reversed */
+.wing-left .branch,
+.wing-left .branch .wing-left-inner {
+    flex-direction: row-reverse;
+}
+
+/* The nested children containers inside a left-wing branch also
+   need right-side margin instead of left, and right-alignment */
+.wing-left .children {
+    margin-left: 0;
+    margin-right: 56px;
+    align-items: flex-end;
+}
+
+/* ============================================================
+   NODE CONTAINER & NODE
+   ============================================================ */
+.node-container {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.node {
+    min-width: 110px;
+    min-height: 28px;
+    padding: 9px 13px;
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    outline: none;
+    cursor: text;
+    white-space: pre-wrap;
+    word-break: break-word;
+    transition: border-color 0.18s, box-shadow 0.18s, background-color 0.18s, color 0.18s;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+/* Placeholder text when node is empty */
+.node:empty::before {
+    content: attr(data-placeholder);
+    color: #bbb;
+    pointer-events: none;
+    font-style: italic;
+}
+
+/* Active / focused node highlight */
+.node.active {
+    border-color: #f5a623;
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.25), 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ============================================================
+   HOVER CONTROLS (arrow buttons on node-container hover)
+   ============================================================ */
+.controls {
+    display: none;
+    position: absolute;
+    /* Float above the top-right corner of the node */
+    top: -14px;
+    right: -8px;
+    gap: 4px;
+    z-index: 10;
+}
+
+.node-container:hover .controls {
+    display: flex;
+}
+
+.btn-add {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.4;
+}
+
+.btn-add:hover {
+    background: #e8f0fe;
+    border-color: #4285f4;
+}
+
+/* For non-root child nodes: sibling (up arrow) + child (right arrow) */
+.btn-sibling { }
+.btn-child   { }
+
+/* For the root node only: explicit left/right buttons */
+.btn-child-left  { }
+.btn-child-right { }
+
+/* Vertical divider between tab bar and workspace buttons */
+.toolbar-divider-vertical {
+    width: 1px;
+    height: 28px;
+    background-color: #e0e0e0;
+    flex-shrink: 0;
+    margin: 0 4px;
+}
+ 
+#workspace-controls {
+    margin-left: auto; /* push to the far right of the toolbar */
+    gap: 6px;
+}
+ 
+.btn-workspace {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 11px;
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: inherit;
+    border-radius: 6px;
+    border: 1px solid #d0d0d0;
+    cursor: pointer;
+    background: #f7f7f7;
+    color: #444;
+    white-space: nowrap;
+    transition: background 0.14s, border-color 0.14s, color 0.14s, box-shadow 0.14s;
+    user-select: none;
+    line-height: 1;
+}
+ 
+.btn-workspace:hover {
+    background: #eef2ff;
+    border-color: #4a7ee8;
+    color: #2255cc;
+    box-shadow: 0 1px 3px rgba(74, 126, 232, 0.18);
+}
+ 
+/* Import label acts as a button */
+label.btn-workspace {
+    cursor: pointer;
+}
+label.btn-workspace:hover {
+    background: #eef2ff;
+    border-color: #4a7ee8;
+    color: #2255cc;
+}
+ 
+/* Clear / nuke — red accent */
+.btn-clear {
+    color: #c0392b;
+    border-color: #e8c0bc;
+    background: #fff5f5;
+}
+.btn-clear:hover {
+    background: #fde8e6;
+    border-color: #e53935;
+    color: #b71c1c;
+    box-shadow: 0 1px 3px rgba(229, 57, 53, 0.18);
+}
+ 
+/* Toast notification (auto-save feedback) */
+#save-toast {
+    position: fixed;
+    bottom: 62px;
+    right: 20px;
+    background: #323232;
+    color: #fff;
+    font-size: 12.5px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    z-index: 500;
+}
+#save-toast.visible {
+    opacity: 1;
+}
+ 
