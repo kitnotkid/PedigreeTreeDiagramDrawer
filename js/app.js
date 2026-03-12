@@ -897,49 +897,31 @@ document.getElementById('btn-clear').addEventListener('click', clearWorkspace);
 // Save after any structural keyboard action (Enter/Tab/Backspace handled in canvas keydown)
 canvas().addEventListener('keydown', function (e) {
     if (!e.target.classList.contains('node')) return;
+    if (e.key === ' ') {
+        debouncedSave(500);
+    }
+});
+
+// 2. New node created — structural keys that cause DOM mutation
+canvas().addEventListener('keydown', function (e) {
+    if (!e.target.classList.contains('node')) return;
     const structural = ['Enter', 'Tab', 'Backspace'];
     if (structural.includes(e.key)) {
-        // Delay until after the Phase 4 handler has mutated the DOM
         setTimeout(saveWorkspace, 50);
     }
 });
 
-// Debounced save on text input (typing)
-canvas().addEventListener('input', function (e) {
-    if (e.target.classList.contains('node')) {
-        debouncedSave(900);
+// Hover buttons also create new nodes
+canvas().addEventListener('click', function (e) {
+    if (e.target.closest('.btn-add')) {
+        setTimeout(saveWorkspace, 50);
     }
 });
 
-// Save when user finishes editing a node (blur/focusout)
+// 3. Focus leaves a node (user clicks away or tabs out)
 canvas().addEventListener('focusout', function (e) {
     if (e.target.classList.contains('node')) {
-        debouncedSave(200);
-    }
-});
-
-// Save after color changes
-document.getElementById('bottom-toolbar').addEventListener('click', function (e) {
-    if (e.target.classList.contains('swatch')) debouncedSave(300);
-});
-document.getElementById('bg-color-custom').addEventListener('change', function () {
-    debouncedSave(300);
-});
-document.getElementById('text-color-custom').addEventListener('change', function () {
-    debouncedSave(300);
-});
-
-// Save after tab rename (piggybacks on the focusout handler in Phase 4)
-tabContainer().addEventListener('focusout', function (e) {
-    if (e.target.classList.contains('tab-name')) {
-        setTimeout(saveWorkspace, 50);
-    }
-});
-
-// Save after tab closed (the Phase 4 handler mutates tabsData synchronously)
-tabContainer().addEventListener('click', function (e) {
-    if (e.target.classList.contains('btn-close-tab')) {
-        setTimeout(saveWorkspace, 50);
+        saveWorkspace();
     }
 });
 
