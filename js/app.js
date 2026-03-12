@@ -294,6 +294,18 @@ tabContainer().addEventListener('click', function (e) {
                 document.getElementById('btn-add-tab').click();
             }
         }
+
+        if (tabIdToDelete === currentTabId) {
+            if (tabsData.length > 0) {
+                // Load the last available tab
+                loadTab(tabsData[tabsData.length - 1].id);
+            } else {
+                // We closed the very last tab! Simulate clicking the "+" button.
+                document.getElementById('btn-add-tab').click();
+            }
+        }
+        
+        saveWorkspace();
         return; // Stop here so we don't trigger the tab switch logic below
     }
 
@@ -351,6 +363,8 @@ tabContainer().addEventListener('focusout', function (e) {
     const tabEl = tabName.closest('.tab');
     const tabData = tabsData.find(t => t.id === tabEl.dataset.tabId);
     if (tabData) tabData.name = newName;
+
+    saveWorkspace();
 });
 
 // "+" button → handled by _onAddTabClick (defined in Phase 5 block below)
