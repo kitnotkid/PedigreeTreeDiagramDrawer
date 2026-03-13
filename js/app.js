@@ -267,7 +267,7 @@ function loadTab(tabId) {
     if (firstNode) selectNode(firstNode);
 
     // Lines must be redrawn after DOM is settled
-    requestAnimationFrame(drawLines);
+    requestAnimationFrame(() => requestAnimationFrame(drawLines));
 }
 
 // ─── TAB BAR EVENT DELEGATION ─────────────────────────────
@@ -682,7 +682,7 @@ function loadWorkspace() {
     const firstNode = canvas().querySelector('.node');
     if (firstNode) selectNode(firstNode);
 
-    requestAnimationFrame(drawLines);
+    requestAnimationFrame(() => requestAnimationFrame(drawLines));
     return true;
 }
 
@@ -759,12 +759,22 @@ function _pad(n) { return String(n).padStart(2, '0'); }
 
 // ─── IMPORT ───────────────────────────────────────────────
 
-/**
- * Read a .json file from the file input, validate, overwrite workspace.
+ /* Algorithm:
+ *   1. Parse and validate the JSON file.
+ *   2. Save the current live tab before touching anything.
+ *   3. Restamp each incoming tab with a fresh unique id so it
+ *      can never collide with an existing tab — safe to import
+ *      the same file multiple times.
+ *   4. Push the remapped tabs onto the END of tabsData.
+ *   5. Append a DOM tab element for each imported tab (we do NOT
+ *      call _rebuildTabBarDOM — that would wipe existing tabs).
+ *   6. Switch to the FIRST of the newly imported tabs so the user
+ *      immediately sees the imported content.
+ *   7. Persist the merged workspace to localStorage.
  */
 function importWorkspace(file) {
     if (!file) return;
-
+ 
     const reader = new FileReader();
     reader.onload = function (e) {
         let payload;
@@ -774,40 +784,55 @@ function importWorkspace(file) {
             alert('Import failed: the file is not valid JSON.');
             return;
         }
-
+ 
         // Validate shape
         if (!Array.isArray(payload.tabsData) || payload.tabsData.length === 0) {
             alert('Import failed: JSON does not contain a valid workspace.');
             return;
         }
-
-        // Overwrite in-memory state
-        tabsData     = payload.tabsData;
-        currentTabId = payload.currentTabId || tabsData[0].id;
-
-        // Rebuild the UI
-        _rebuildTabBarDOM();
-
-        const activeTabData = tabsData.find(t => t.id === currentTabId) || tabsData[0];
-        currentTabId = activeTabData.id;
-        canvas().innerHTML = activeTabData.html || BLANK_CANVAS_TEMPLATE();
-        nodeCounter = activeTabData.nodeCounter || 1;
-
-        document.querySelectorAll('.tab').forEach(t => {
-            t.classList.toggle('active', t.dataset.tabId === currentTabId);
+ 
+        // Step 1: Flush the current live canvas into tabsData before we
+        // touch anything — preserves any unsaved edits on the active tab.
+        saveCurrentTab();
+ 
+        // Step 2: Restamp IDs to avoid collisions with existing tabs.
+        const importedTabs = payload.tabsData.map(function (t) {
+            return {
+                id:          'tab-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+                name:        t.name        || 'Imported',
+                html:        t.html        || BLANK_CANVAS_TEMPLATE(),
+                nodeCounter: t.nodeCounter || 1
+            };
         });
-
-        activeNode = null;
-        const firstNode = canvas().querySelector('.node');
-        if (firstNode) selectNode(firstNode);
-
-        requestAnimationFrame(drawLines);
-
-        // Persist the imported data immediately
+ 
+        // Step 3: Append to the in-memory array (no overwrite).
+        tabsData = tabsData.concat(importedTabs);
+ 
+        // Step 4: Append DOM tab elements before the "+" button.
+        // We deliberately do NOT call _rebuildTabBarDOM() here because
+        // that would destroy the existing tabs in the toolbar.
+        const addBtn = document.getElementById('btn-add-tab');
+        importedTabs.forEach(function (t) {
+            const tabEl = document.createElement('div');
+            tabEl.className     = 'tab';
+            tabEl.dataset.tabId = t.id;
+            tabEl.innerHTML = `
+                <span class="tab-name">${_escapeHTML(t.name)}</span>
+                <button class="btn-close-tab" title="Close Tab">×</button>
+            `;
+            addBtn.parentNode.insertBefore(tabEl, addBtn);
+        });
+ 
+        // Step 5: Switch to the first imported tab.
+        // loadTab handles canvas injection + double-rAF drawLines.
+        loadTab(importedTabs[0].id);
+ 
+        // Step 6: Persist the merged workspace.
         saveWorkspace();
-        showToast('⬆ Workspace imported', 2200);
+        const n = importedTabs.length;
+        showToast(`⬆ Imported ${n} tab${n > 1 ? 's' : ''} — appended to workspace`, 2800);
     };
-
+ 
     reader.readAsText(file);
 }
 
@@ -846,7 +871,7 @@ function clearWorkspace() {
         firstNode.focus();
     }
 
-    requestAnimationFrame(drawLines);
+    requestAnimationFrame(() => requestAnimationFrame(drawLines));
     showToast('🗑 Workspace cleared', 2200);
 }
 
